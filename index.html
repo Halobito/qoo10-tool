@@ -1,676 +1,503 @@
+
 <!DOCTYPE html>
-<!-- saved from url=(0052)file:///C:/Users/assa1/Downloads/qoo10_seller_1.html -->
-<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>큐텐재팬 셀러 어시스턴트</title>
-<link rel="stylesheet" href="./큐텐재팬 셀러 어시스턴트_files/tabler-icons.min.css">
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #f5f4f0;
-    --surface: #ffffff;
-    --border: #e2e0d8;
-    --border2: #ccc9be;
-    --text: #1a1916;
-    --muted: #6b6960;
-    --hint: #9c9a92;
-    --accent: #d85a30;
-    --accent-dark: #b84825;
-    --green: #1d9e75;
-    --green-light: #e1f5ee;
-    --green-dark: #0f6e56;
-    --green-deeper: #085041;
-    --radius: 10px;
-    --radius-sm: 6px;
-    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
-  }
-  body { font-family: -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-    background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5;
-    min-height: 100vh; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f4f0;--surface:#fff;--border:#e2e0d8;--border2:#ccc9be;
+  --text:#1a1916;--muted:#6b6960;--hint:#9c9a92;
+  --accent:#d85a30;--green:#1d9e75;--gl:#e1f5ee;--gd:#0f6e56;--gdp:#085041;
+  --r:10px;--rs:6px;
+}
+body{font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
 
-  /* header */
-  .header { background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 14px 24px; display: flex; align-items: center; justify-content: space-between;
-    position: sticky; top: 0; z-index: 100; }
-  .header-left { display: flex; align-items: center; gap: 10px; }
-  .logo { width: 32px; height: 32px; background: var(--accent); border-radius: 8px;
-    display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; }
-  .header-title { font-size: 15px; font-weight: 600; }
-  .header-sub { font-size: 12px; color: var(--muted); }
+.hdr{background:var(--surface);border-bottom:1px solid var(--border);
+  padding:12px 20px;display:flex;align-items:center;gap:8px}
+.logo{width:28px;height:28px;background:var(--accent);border-radius:7px;
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;flex-shrink:0}
+.hdr-title{font-size:14px;font-weight:600}
+.hdr-sub{font-size:11px;color:var(--muted)}
 
-  /* api key bar */
-  .apibar { background: #fef9f0; border-bottom: 1px solid #f5e8c8; padding: 8px 24px;
-    display: flex; align-items: center; gap: 10px; font-size: 12px; }
-  .apibar input { flex: 1; max-width: 380px; padding: 5px 10px; border: 1px solid var(--border2);
-    border-radius: var(--radius-sm); font-size: 12px; font-family: monospace;
-    background: white; color: var(--text); }
-  .apibar input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
-  .api-saved { color: var(--green-dark); font-weight: 500; display: none; align-items: center; gap: 4px; }
+.main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;padding:14px;max-width:960px;margin:0 auto}
 
-  /* layout */
-  .main { max-width: 1100px; margin: 0 auto; padding: 20px 20px; display: grid;
-    grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
-  @media (max-width: 720px) { .main { grid-template-columns: 1fr; } }
+.card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.slabel{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
 
-  .col { display: flex; flex-direction: column; gap: 12px; }
+.field{margin-bottom:8px}
+.field label{font-size:11px;color:var(--muted);display:block;margin-bottom:3px}
+.field input,.field textarea{width:100%;font-size:13px;padding:6px 8px;
+  border:1px solid var(--border2);border-radius:var(--rs);background:#fff;color:var(--text);font-family:inherit}
+.field input:focus,.field textarea:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+.field textarea{resize:vertical}
+.field input.af{border-color:var(--green);background:#f7fdf9;color:var(--gd)}
 
-  /* cards */
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 16px 18px; box-shadow: var(--shadow); }
-  .card-label { font-size: 11px; font-weight: 600; color: var(--hint);
-    text-transform: uppercase; letter-spacing: .07em; margin-bottom: 12px; }
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 
-  /* form */
-  .field { margin-bottom: 10px; }
-  .field:last-child { margin-bottom: 0; }
-  label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 4px; }
-  input[type=text], input[type=number], select, textarea {
-    width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);
-    font-size: 13px; font-family: inherit; background: var(--surface); color: var(--text);
-    transition: border-color .15s; }
-  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
-  textarea { resize: vertical; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stabs{display:flex;gap:4px;margin-bottom:12px}
+.stab{flex:1;padding:5px 0;font-size:11px;font-weight:500;border-radius:20px;cursor:pointer;
+  text-align:center;border:.5px solid var(--border);background:var(--bg);color:var(--muted);transition:all .15s}
+.stab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 
-  /* method tabs */
-  .tabs { display: flex; gap: 4px; background: var(--bg); border-radius: var(--radius-sm); padding: 3px; }
-  .tab { flex: 1; text-align: center; padding: 5px 4px; font-size: 12px; border-radius: 4px;
-    cursor: pointer; color: var(--muted); transition: all .15s; border: none; background: none; font-family: inherit; }
-  .tab.on { background: white; color: var(--text); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+.fee-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.fee-box{padding:8px 10px;border-radius:var(--rs);border:.5px solid var(--border);
+  cursor:pointer;transition:all .15s;display:flex;align-items:flex-start;gap:8px}
+.fee-box.on{border-color:var(--green);background:var(--gl)}
+.chk{width:15px;height:15px;border-radius:3px;border:1.5px solid var(--border2);margin-top:1px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.chk.on{border-color:var(--green);background:var(--green)}
+.fee-name{font-size:12px;font-weight:500;line-height:1.3}
+.fee-box.on .fee-name{color:var(--gd)}
+.fee-sub{font-size:10px;color:var(--muted)}
+.rate-input-wrap{display:flex;align-items:center;gap:2px;margin-top:4px}
+.rate-input{width:44px;font-size:12px;padding:2px 5px;border:1px solid var(--border2);
+  border-radius:4px;background:#fff;color:var(--text);text-align:right;font-family:inherit}
+.rate-input:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+.rate-unit{font-size:11px;color:var(--muted)}
+.fee-body{flex:1;min-width:0}
 
-  /* fee boxes */
-  .fee-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .fee-fixed { padding: 8px 10px; border-radius: var(--radius-sm); background: var(--bg);
-    font-size: 12px; color: var(--hint); display: flex; align-items: center; gap: 5px; }
-  .fee-box { padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border);
-    cursor: pointer; transition: all .15s; display: flex; align-items: flex-start; gap: 7px;
-    background: var(--surface); user-select: none; }
-  .fee-box.on { border-color: var(--green); background: var(--green-light); }
-  .chk { width: 15px; height: 15px; border-radius: 3px; border: 1.5px solid var(--border2);
-    background: transparent; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-    margin-top: 1px; transition: all .15s; }
-  .chk.on { border-color: var(--green); background: var(--green); }
-  .fee-name { font-size: 12px; font-weight: 600; }
-  .fee-name .rate { font-weight: 400; color: var(--muted); }
-  .fee-desc { font-size: 10px; color: var(--muted); margin-top: 1px; }
+.btn-calc{width:100%;padding:10px;font-weight:600;font-size:13px;
+  background:var(--accent);color:#fff;border:none;border-radius:var(--r);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .15s}
+.btn-calc:hover{opacity:.88}
+.btn-gen{width:100%;padding:10px;font-weight:600;font-size:13px;
+  background:var(--gdp);color:#fff;border:none;border-radius:var(--r);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .15s}
+.btn-gen:hover{opacity:.88}
+.btn-gen:disabled{background:var(--bg);color:var(--muted);cursor:not-allowed}
 
-  /* buttons */
-  .btn { width: 100%; padding: 11px; font-size: 14px; font-weight: 600; border: none;
-    border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center;
-    justify-content: center; gap: 6px; transition: opacity .15s, transform .1s; font-family: inherit; }
-  .btn:active { transform: scale(.98); }
-  .btn-calc { background: var(--accent); color: white; }
-  .btn-calc:hover { background: var(--accent-dark); }
-  .btn-gen { background: var(--green-deeper); color: white; }
-  .btn-gen:hover { opacity: .88; }
-  .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+.irow{display:flex;justify-content:space-between;align-items:center;
+  padding:5px 0;border-bottom:.5px solid var(--border);font-size:13px}
+.irow:last-child{border-bottom:none}
 
-  /* result */
-  .price-hero { text-align: center; padding: 14px 0 18px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
-  .price-label { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
-  .price-num { font-size: 36px; font-weight: 700; color: var(--accent); letter-spacing: -1px; }
-  .price-margin { font-size: 12px; color: var(--green); margin-top: 4px; }
-  .row { display: flex; justify-content: space-between; align-items: center;
-    padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
-  .row:last-child { border-bottom: none; }
-  .row-label { color: var(--muted); }
-  .row-val { font-weight: 500; }
-  .row.bold .row-label { color: var(--text); font-weight: 600; }
-  .row.bold .row-val { color: var(--text); font-weight: 700; }
-  .row.accent .row-val { color: var(--green-dark); }
-  .row-indent { font-size: 11px; color: var(--hint); padding: 2px 0 4px 12px; }
+.ptable{width:100%;border-collapse:collapse;font-size:13px}
+.ptable th{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.05em;padding:5px 8px;text-align:right;border-bottom:1px solid var(--border)}
+.ptable th:first-child{text-align:left}
+.ptable td{padding:7px 8px;border-bottom:.5px solid var(--border);text-align:right}
+.ptable td:first-child{text-align:left}
+.ptable tr.tr-sel td{background:#fff8f5}
+.ptable tr.tr-sel td:first-child{border-left:2px solid var(--accent);padding-left:6px}
+.ptable tr.tier-row{cursor:pointer;transition:background .12s}
+.ptable tr.tier-row:hover td{background:#faf9f7}
+.tbadge{font-size:10px;padding:1px 6px;border-radius:20px;font-weight:500}
+.b-brk{background:#f0f0f0;color:var(--muted)}
+.b-min{background:#fff3e0;color:#e65c00}
+.b-agg{background:#e8f4fd;color:#1565c0}
+.b-bas{background:#f3e5f5;color:#6a1b9a}
+.b-rec{background:#e1f5ee;color:var(--gd)}
+.b-com{background:#fce4ec;color:#b71c1c}
+.pval{font-weight:600;font-size:14px}
+.mval{font-weight:500}
+.mp{color:var(--green)}.mz{color:var(--muted)}.mn{color:#e53935}
 
-  /* content output */
-  .name-box { padding: 10px 12px; background: var(--bg); border-radius: var(--radius-sm);
-    font-size: 13px; font-weight: 500; line-height: 1.5; }
-  .copy-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-  .copy-row span { font-size: 11px; color: var(--muted); }
-  .copy-btn { background: none; border: 1px solid var(--border); border-radius: 4px;
-    padding: 3px 8px; font-size: 11px; cursor: pointer; color: var(--muted); display: flex;
-    align-items: center; gap: 3px; font-family: inherit; transition: all .15s; }
-  .copy-btn:hover { background: var(--bg); color: var(--text); }
-  .copy-btn.ok { color: var(--green-dark); border-color: var(--green); }
-  .copy-pill { padding: 7px 10px; background: var(--green-light); border-radius: var(--radius-sm);
-    color: var(--green-dark); font-size: 13px; font-weight: 500; margin-bottom: 4px;
-    display: flex; justify-content: space-between; align-items: center; }
-  .kw-wrap { display: flex; flex-wrap: wrap; gap: 4px; }
-  .kw { font-size: 11px; padding: 3px 9px; border-radius: 20px; border: 1px solid var(--border);
-    background: var(--bg); color: var(--muted); }
-  .html-out { width: 100%; font-family: monospace; font-size: 11px; color: var(--muted);
-    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm);
-    padding: 8px 10px; resize: vertical; }
+.sel-box{padding:14px 0 16px;border-bottom:.5px solid var(--border);margin-bottom:12px;text-align:center}
+.sel-price{font-size:32px;font-weight:500;color:var(--accent);letter-spacing:-.5px;line-height:1.1}
+.sel-mrow{display:flex;align-items:baseline;justify-content:center;gap:8px;margin-top:6px;flex-wrap:wrap}
 
-  /* badges */
-  .badge-ok { display: flex; align-items: center; gap: 5px; padding: 6px 10px;
-    background: var(--green-light); border-radius: var(--radius-sm); color: var(--green-dark);
-    font-size: 11px; font-weight: 600; margin-bottom: 12px; }
-  .empty { padding: 40px 20px; text-align: center; color: var(--muted); }
-  .empty i { font-size: 40px; display: block; margin-bottom: 10px; opacity: .3; }
+.copy-pill{padding:6px 10px;background:var(--gl);border-radius:var(--rs);
+  color:var(--gd);font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:space-between}
+.badge{display:inline-block;font-size:11px;padding:2px 7px;border-radius:20px;
+  border:.5px solid var(--border);background:var(--bg);color:var(--muted)}
+.err{font-size:12px;color:#c62828;padding:8px 10px;background:#fdecea;border-radius:var(--rs);margin-top:8px}
+.inote{font-size:11px;color:var(--muted);padding:6px 8px;background:var(--bg);border-radius:var(--rs);line-height:1.6}
+.whint{font-size:10px;color:var(--gd);margin-top:2px;display:none}
 
-  /* info note */
-  .note { font-size: 11px; color: var(--hint); padding: 6px 8px; background: var(--bg);
-    border-radius: var(--radius-sm); line-height: 1.6; margin-bottom: 12px; }
-
-  /* error */
-  .err { font-size: 12px; color: #a32d2d; padding: 8px 10px; background: #fcebeb;
-    border-radius: var(--radius-sm); display: none; }
-
-  /* spinner */
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .spin { display: inline-block; animation: spin 1s linear infinite; }
-
-  /* section divider */
-  .divider { height: 1px; background: var(--border); margin: 10px 0; }
+.empty{background:var(--bg);border:.5px solid var(--border);border-radius:var(--r);
+  padding:2.5rem 1.5rem;text-align:center}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.spin{animation:spin 1s linear infinite}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-left">
-    <div class="logo"><i class="ti ti-building-store"></i></div>
-    <div>
-      <div class="header-title">큐텐재팬 셀러 어시스턴트</div>
-      <div class="header-sub">원가 입력 → 가격 계산 → 일본어 콘텐츠 자동 생성</div>
-    </div>
+<div class="hdr">
+  <div class="logo"><i class="ti ti-building-store"></i></div>
+  <div>
+    <div class="hdr-title">큐텐재팬 셀러 어시스턴트</div>
+    <div class="hdr-sub">원가 입력 → 마진 시뮬레이션 → 일본어 콘텐츠 생성</div>
   </div>
-</div>
-
-<div class="apibar">
-  <i class="ti ti-key" style="color:#ba7517;font-size:14px"></i>
-  <span style="color:#5f5e5a;font-weight:500">Anthropic API Key</span>
-  <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-...">
-  <button class="copy-btn" onclick="saveKey()" style="font-size:12px;padding:5px 10px">저장</button>
-  <span class="api-saved" id="apiSaved"><i class="ti ti-check"></i> 저장됨</span>
-  <span style="color:var(--hint);font-size:11px;margin-left:auto">콘텐츠 생성 기능에만 사용됩니다. 브라우저 내에만 저장됩니다.</span>
 </div>
 
 <div class="main">
   <!-- LEFT -->
-  <div class="col">
-
-    <!-- 상품 정보 -->
+  <div style="display:flex;flex-direction:column;gap:12px">
     <div class="card">
-      <div class="card-label">상품 정보</div>
-      <div class="field"><label>상품명 (한국어)</label>
-        <input type="text" id="productName" placeholder="예: 티엘라 퍼퓸 너리싱 바디크림"></div>
-      <div class="grid2">
-        <div class="field"><label>용량</label>
-          <input type="text" id="capacity" placeholder="예: 200ml"></div>
-        <div class="field"><label>옵션 구성</label>
-          <input type="text" id="options" placeholder="예: 선셋 / 퓨어"></div>
-      </div>
-      <div class="field"><label>이미지 URL (옵션)</label>
-        <textarea id="imageUrls" rows="2" placeholder="선셋: URL
-퓨어: URL"></textarea></div>
-      <div class="field"><label>특이사항</label>
-        <input type="text" id="specialNote" placeholder="예: 각 옵션 원가 동일"></div>
-    </div>
-
-    <!-- 가격 조건 -->
-    <div class="card">
-      <div class="card-label">가격 조건</div>
-
-      <div class="field">
-        <label>배송 방식</label>
-        <div class="tabs">
-          <button class="tab on" onclick="setMethod(&#39;sea&#39;,this)">해상 KSE</button>
-          <button class="tab" onclick="setMethod(&#39;air&#39;,this)">항공 KSE</button>
-          <button class="tab" onclick="setMethod(&#39;light&#39;,this)">소형화물</button>
+      <div class="slabel">상품 정보</div>
+      <div class="field"><label>상품명 (한국어)</label><input id="productName" placeholder=""/></div>
+      <div class="g2">
+        <div class="field" style="margin-bottom:0">
+          <label>용량</label>
+          <input id="capacity" placeholder="" oninput="onCapInput(this.value)"/>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>무게 (kg)</label>
+          <input type="number" step="0.05" id="weight" placeholder="0.30"/>
+          <div class="whint" id="whint"><i class="ti ti-sparkles" style="font-size:9px"></i> 용량에서 자동계산</div>
         </div>
       </div>
+      <div style="height:8px"></div>
+      <div class="field"><label>옵션 구성</label><input id="options" placeholder="선셋 / 퓨어 / 샤인"/></div>
+      <div class="field"><label>이미지 URL (옵션)</label><textarea id="imageUrls" rows="2" placeholder="선셋: URL&#10;퓨어: URL"></textarea></div>
+      <div class="field" style="margin-bottom:0"><label>특이사항</label><input id="specialNote" placeholder="각 옵션 원가 동일"/></div>
+    </div>
 
-      <div class="grid2">
-        <div class="field"><label>원가 (원)</label>
-          <input type="number" id="costKRW" placeholder="18000"></div>
-        <div class="field"><label>무게 (kg)</label>
-          <input type="number" id="weight" step="0.05" placeholder="0.30"></div>
+    <div class="card">
+      <div class="slabel">가격 조건</div>
+      <div class="stabs">
+        <div class="stab on" data-m="sea" onclick="selMethod('sea')">해상</div>
+        <div class="stab" data-m="air" onclick="selMethod('air')">항공</div>
+        <div class="stab" data-m="light" onclick="selMethod('light')">소형</div>
       </div>
-      <div class="grid2">
-        <div class="field"><label>환율 (100엔 = ? 원)</label>
-          <input type="number" id="rate" value="930" step="1"></div>
-        <div class="field"><label>합포장 추가 개수</label>
-          <input type="number" id="extraItems" value="0" min="0"></div>
+      <div class="g2" style="margin-bottom:8px">
+        <div class="field" style="margin-bottom:0"><label>원가 (원)</label><input type="number" id="costKRW" placeholder=""/></div>
+        <div class="field" style="margin-bottom:0"><label>환율 (100엔 = ? 원)</label><input type="number" id="rate" value="930" placeholder="930"/></div>
       </div>
-
-      <div class="note">
-        <i class="ti ti-info-circle" style="font-size:12px;margin-right:4px"></i>
-        현재 환율 기준 100엔≈930원 · 목표마진 10% · 3PL 기본 900원/건 · 합포장 +50원/개
+      <div class="g2" style="margin-bottom:12px">
+        <div class="field" style="margin-bottom:0"><label>합포장 추가 개수</label><input type="number" min="0" id="extraItems" value="0" placeholder="0"/></div>
       </div>
-
-      <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px">수수료 선택</div>
-      <div class="fee-fixed" style="margin-bottom:6px">
-        <i class="ti ti-lock" style="font-size:11px"></i> 큐텐 기본 13% (고정)
+      <div class="inote" style="margin-bottom:10px">
+        <i class="ti ti-info-circle" style="margin-right:4px;font-size:12px"></i>
+        3PL 기본 900원/건 · 합포장 +50원/개
+      </div>
+      <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px">수수료 선택 (% 직접 수정 가능)</div>
+      <div style="padding:6px 10px;border-radius:var(--rs);background:var(--bg);font-size:12px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:6px">
+        <i class="ti ti-lock" style="font-size:11px"></i> 큐텐 기본
+        <input id="baseRate" type="number" value="13" min="0" max="50" step="0.5"
+          style="width:40px;font-size:12px;padding:1px 4px;border:1px solid var(--border2);border-radius:4px;text-align:right"
+          onclick="event.stopPropagation()"/>
+        <span style="font-size:11px">% (고정)</span>
       </div>
       <div class="fee-grid">
-        <div class="fee-box" id="fee-ad" onclick="toggleFee(&#39;ad&#39;)">
-          <div class="chk" id="chk-ad"></div>
-          <div><div class="fee-name">광고 <span class="rate">+5%</span></div></div>
-        </div>
-        <div class="fee-box on" id="fee-coupon" onclick="toggleFee(&#39;coupon&#39;)">
-          <div class="chk on" id="chk-coupon"><i class="ti ti-check" style="font-size:10px;color:white"></i></div>
-          <div>
-            <div class="fee-name">쿠폰할인 <span class="rate">+2~4%</span></div>
-            <div class="fee-desc">3천↑2% · 5천↑3% · 8천↑4%</div>
+        <div class="fee-box on" id="fb-ad" onclick="toggleFee('ad')">
+          <div class="chk on" id="chk-ad"><i class="ti ti-check" style="font-size:9px;color:#fff"></i></div>
+          <div class="fee-body">
+            <div class="fee-name">광고</div>
+            <div class="rate-input-wrap" onclick="event.stopPropagation()">
+              <input class="rate-input" id="r-ad" type="number" value="5" min="0" max="50" step="0.5"/>
+              <span class="rate-unit">%</span>
+            </div>
           </div>
         </div>
-        <div class="fee-box" id="fee-megawari" onclick="toggleFee(&#39;megawari&#39;)">
-          <div class="chk" id="chk-megawari"></div>
-          <div><div class="fee-name">메가와리 <span class="rate">+11%</span></div></div>
+        <div class="fee-box on" id="fb-coupon" onclick="toggleFee('coupon')">
+          <div class="chk on" id="chk-coupon"><i class="ti ti-check" style="font-size:9px;color:#fff"></i></div>
+          <div class="fee-body">
+            <div class="fee-name">쿠폰할인</div>
+            <div class="fee-sub">3천↑2% · 5천↑3% · 8천↑4%</div>
+          </div>
         </div>
-        <div class="fee-box" id="fee-megapo" onclick="toggleFee(&#39;megapo&#39;)">
+        <div class="fee-box" id="fb-megawari" onclick="toggleFee('megawari')">
+          <div class="chk" id="chk-megawari"></div>
+          <div class="fee-body">
+            <div class="fee-name">메가와리</div>
+            <div class="rate-input-wrap" onclick="event.stopPropagation()">
+              <input class="rate-input" id="r-megawari" type="number" value="11" min="0" max="50" step="0.5"/>
+              <span class="rate-unit">%</span>
+            </div>
+          </div>
+        </div>
+        <div class="fee-box" id="fb-megapo" onclick="toggleFee('megapo')">
           <div class="chk" id="chk-megapo"></div>
-          <div><div class="fee-name">메가포 <span class="rate">+5%</span></div></div>
+          <div class="fee-body">
+            <div class="fee-name">메가포</div>
+            <div class="rate-input-wrap" onclick="event.stopPropagation()">
+              <input class="rate-input" id="r-megapo" type="number" value="5" min="0" max="50" step="0.5"/>
+              <span class="rate-unit">%</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <button class="btn btn-calc" onclick="calc()">
+    <button class="btn-calc" onclick="calc()">
       <i class="ti ti-calculator"></i> 가격 계산하기
     </button>
-    <div class="err" id="errMsg"></div>
-
+    <div id="err" class="err" style="display:none"></div>
   </div>
 
   <!-- RIGHT -->
-  <div class="col" id="rightCol">
-    <div class="card empty" id="emptyState">
-      <i class="ti ti-calculator"></i>
-      <div>원가·무게 입력 후<br>가격 계산 버튼을 눌러주세요</div>
-      <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:14px">
-        <span class="kw">환율 적용</span>
-        <span class="kw">3PL 자동계산</span>
-        <span class="kw">쿠폰 역산</span>
-        <span class="kw">약기법 필터</span>
+  <div style="display:flex;flex-direction:column;gap:12px" id="right">
+    <div class="empty">
+      <i class="ti ti-calculator" style="font-size:32px;display:block;margin-bottom:10px;color:var(--hint);opacity:.5"></i>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">원가·무게 입력 후<br/>가격 계산 버튼을 눌러주세요</div>
+      <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:4px;justify-content:center">
+        <span class="badge">환율 적용</span><span class="badge">3PL 자동계산</span>
+        <span class="badge">쿠폰 역산</span><span class="badge">마진 시뮬레이션</span><span class="badge">약기법 필터</span>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-const KSE_SEA = [
-  [0.10,450],[0.25,525],[0.50,590],[0.75,680],[1.00,720],[1.25,760],[1.50,810],
-  [1.75,860],[2.00,910],[2.50,950],[3.00,1020],[3.50,1110],[4.00,1170],[4.50,1230],
-  [5.00,1340],[5.50,1460],[6.00,1530],[6.50,1610],[7.00,1680],[7.50,1760],[8.00,1830],
-  [8.50,1900],[9.00,1980],[9.50,2040],[10.00,2120],[10.50,2190],[11.00,2270],[11.50,2340],
-  [12.00,2420],[12.50,2490],[13.00,2560],[13.50,2640],[14.00,2720],[14.50,2780],[15.00,2860],
-  [16.00,3020],[17.00,3180],[18.00,3350],[19.00,3510],[20.00,3680],[21.00,3830],[22.00,3980],
-  [23.00,4120],[24.00,4300],[25.00,4400],[26.00,4550],[27.00,4700],[28.00,4840],[29.00,4960],[30.00,5090]
-];
-const KSE_AIR = [
-  [0.10,490],[0.25,560],[0.50,620],[0.75,700],[1.00,750],[1.25,780],[1.50,830],
-  [1.75,880],[2.00,940],[2.50,1090],[3.00,1197],[3.50,1302],[4.00,1402],[4.50,1498],
-  [5.00,1597],[5.50,1806],[6.00,1906],[6.50,2003],[7.00,2099],[7.50,2195],[8.00,2291],
-  [8.50,2397],[9.00,2494],[9.50,2590],[10.00,2684],[11.00,3061],[12.00,3264],[13.00,3456],
-  [14.00,3652],[15.00,3845],[16.00,4037],[17.00,4239],[18.00,4432],[19.00,4628],[20.00,4820],
-  [21.00,5290],[22.00,5489],[23.00,5685],[24.00,5878],[25.00,6074],[26.00,6266],[27.00,6468],
-  [28.00,6661],[29.00,6857],[30.00,7049]
-];
-const KSE_LIGHT = [[0.10,350],[0.25,400],[0.50,460],[0.75,490],[1.00,530]];
+const KSE_SEA=[[0.10,450],[0.25,525],[0.50,590],[0.75,680],[1.00,720],[1.25,760],[1.50,810],[1.75,860],[2.00,910],[2.50,950],[3.00,1020],[3.50,1110],[4.00,1170],[4.50,1230],[5.00,1340],[5.50,1460],[6.00,1530],[6.50,1610],[7.00,1680],[7.50,1760],[8.00,1830],[8.50,1900],[9.00,1980],[9.50,2040],[10.00,2120],[10.50,2190],[11.00,2270],[11.50,2340],[12.00,2420],[12.50,2490],[13.00,2560],[13.50,2640],[14.00,2720],[14.50,2780],[15.00,2860],[16.00,3020],[17.00,3180],[18.00,3350],[19.00,3510],[20.00,3680],[21.00,3830],[22.00,3980],[23.00,4120],[24.00,4300],[25.00,4400],[26.00,4550],[27.00,4700],[28.00,4840],[29.00,4960],[30.00,5090]];
+const KSE_AIR=[[0.10,490],[0.25,560],[0.50,620],[0.75,700],[1.00,750],[1.25,780],[1.50,830],[1.75,880],[2.00,940],[2.50,1090],[3.00,1197],[3.50,1302],[4.00,1402],[4.50,1498],[5.00,1597],[5.50,1806],[6.00,1906],[6.50,2003],[7.00,2099],[7.50,2195],[8.00,2291],[8.50,2397],[9.00,2494],[9.50,2590],[10.00,2684],[11.00,3061],[12.00,3264],[13.00,3456],[14.00,3652],[15.00,3845],[16.00,4037],[17.00,4239],[18.00,4432],[19.00,4628],[20.00,4820],[21.00,5290],[22.00,5489],[23.00,5685],[24.00,5878],[25.00,6074],[26.00,6266],[27.00,6468],[28.00,6661],[29.00,6857],[30.00,7049]];
+const KSE_LIGHT=[[0.10,350],[0.25,400],[0.50,460],[0.75,490],[1.00,530]];
 
-let method = 'sea';
-const fees = { ad: false, coupon: true, megawari: false, megapo: false };
-let lastResult = null;
-
-function setMethod(m, el) {
-  method = m;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
-  el.classList.add('on');
+function getShip(w,m){
+  const t=m==='sea'?KSE_SEA:m==='air'?KSE_AIR:KSE_LIGHT;
+  for(const[a,b]of t){if(w<=a)return b;}return t[t.length-1][1];
 }
 
-function toggleFee(k) {
-  fees[k] = !fees[k];
-  const box = document.getElementById('fee-' + k);
-  const chk = document.getElementById('chk-' + k);
-  box.classList.toggle('on', fees[k]);
-  chk.classList.toggle('on', fees[k]);
-  chk.innerHTML = fees[k] ? '<i class="ti ti-check" style="font-size:10px;color:white"></i>' : '';
-}
-
-function getShipping(weight) {
-  const table = method === 'sea' ? KSE_SEA : method === 'air' ? KSE_AIR : KSE_LIGHT;
-  for (const [w, r] of table) { if (weight <= w) return r; }
-  return table[table.length - 1][1];
-}
-
-function getCouponRate(price) {
-  if (price >= 8000) return 0.04;
-  if (price >= 5000) return 0.03;
-  if (price >= 3000) return 0.02;
+// 원래 쿠폰 로직 — ¥3000 미만이면 0%
+function getCouponRate(price){
+  if(price>=8000)return 0.04;
+  if(price>=5000)return 0.03;
+  if(price>=3000)return 0.02;
   return 0;
 }
 
-// 판매가(JPY)에서 마진율 계산 (GPT 방식)
-// 실수령(원) = 판매가(JPY) × 0.87 × 환율(원/엔)
-// 마진(원) = 실수령 - 총비용(원)
-// 마진율 = 마진(원) ÷ 판매가(원)
-function calcMargin(priceJPY, totalCostKRW, rateKRWperJPY, extraFeeRate) {
-  const feeRate = 0.13 + (extraFeeRate || 0);
-  const receiveKRW = priceJPY * (1 - feeRate) * rateKRWperJPY;
-  const marginKRW = receiveKRW - totalCostKRW;
-  const priceKRW = priceJPY * rateKRWperJPY;
-  const marginRate = (marginKRW / priceKRW) * 100;
-  return { receiveKRW, marginKRW, marginRate, priceKRW };
+const fees={ad:true,coupon:true,megawari:false,megapo:false};
+let method='sea',calcResult=null,selIdx=4,genContent=null;
+
+function getR(id){return parseFloat(document.getElementById('r-'+id).value)||0;}
+function getBase(){return(parseFloat(document.getElementById('baseRate').value)||13)/100;}
+
+function selMethod(m){
+  method=m;
+  document.querySelectorAll('.stab').forEach(t=>t.classList.toggle('on',t.dataset.m===m));
+}
+function toggleFee(id){
+  fees[id]=!fees[id];
+  const box=document.getElementById('fb-'+id);
+  const chk=document.getElementById('chk-'+id);
+  box.classList.toggle('on',fees[id]);
+  chk.classList.toggle('on',fees[id]);
+  chk.innerHTML=fees[id]?'<i class="ti ti-check" style="font-size:9px;color:#fff"></i>':'';
+  const nm=box.querySelector('.fee-name');
+  if(nm)nm.style.color=fees[id]?'var(--gd)':'';
 }
 
-// 목표 마진율에서 판매가(JPY) 역산
-function priceFromMargin(targetMarginRate, totalCostKRW, rateKRWperJPY) {
-  // 판매가(KRW) = 총비용 / (0.87 - targetMargin)
-  // 판매가(JPY) = 판매가(KRW) / 환율
-  const priceKRW = totalCostKRW / (0.87 - targetMarginRate);
-  const priceJPY = priceKRW / rateKRWperJPY;
-  return Math.ceil(priceJPY / 10) * 10;
+function onCapInput(v){
+  const m=v.match(/([0-9]+(?:\.[0-9]+)?)\s*(ml|ML|g|G|oz|OZ|L|l)?/);
+  if(!m)return;
+  let a=parseFloat(m[1]);
+  const u=(m[2]||'ml').toLowerCase();
+  if(u==='l')a*=1000;
+  if(u==='oz')a*=29.57;
+  const cg=a<=100?100:a<=300?130:a<=500?160:200;
+  const kg=Math.ceil((a+cg)/1000/0.05)*0.05;
+  const el=document.getElementById('weight');
+  el.value=kg.toFixed(2);el.classList.add('af');
+  document.getElementById('whint').style.display='block';
 }
-
-function showErr(msg) {
-  const el = document.getElementById('errMsg');
-  el.textContent = msg; el.style.display = msg ? 'block' : 'none';
-}
-
-function fmt(n) { return Math.round(n).toLocaleString(); }
-function fmtJPY(n) { return Math.round(n).toLocaleString('ja-JP'); }
-
-function getMarginColor(rate) {
-  if (rate < 0) return '#c0392b';
-  if (rate < 3) return '#e67e22';
-  if (rate < 8) return '#f39c12';
-  if (rate < 15) return '#27ae60';
-  return '#1d9e75';
-}
-
-function getTierLabel(rate) {
-  if (rate < 0) return { label: '손실', tag: 'loss' };
-  if (rate < 3) return { label: '최저가', tag: 'min' };
-  if (rate < 8) return { label: '공격형', tag: 'attack' };
-  if (rate < 15) return { label: '✓ 추천', tag: 'rec' };
-  return { label: '여유', tag: 'safe' };
-}
-
-function calc() {
-  const costKRW = parseFloat(document.getElementById('costKRW').value);
-  const weight = parseFloat(document.getElementById('weight').value);
-  const krwPer100JPY = parseFloat(document.getElementById('rate').value);
-  if (!costKRW || !weight || !krwPer100JPY) { showErr('원가, 무게, 환율을 입력해주세요.'); return; }
-  showErr('');
-
-  const rateKRWperJPY = krwPer100JPY / 100; // 원/엔 (e.g. 9.3)
-  const shippingJPY = getShipping(weight);
-  const extraItems = parseInt(document.getElementById('extraItems').value) || 0;
-  const threePlKRW = 900 + extraItems * 50;
-
-  // 총비용 전부 원화 기준
-  const shippingKRW = shippingJPY * rateKRWperJPY;
-  const totalCostKRW = costKRW + shippingKRW + threePlKRW;
-  const methodLabel = method === 'sea' ? '해상' : method === 'air' ? '항공' : '소형';
-
-  // 추가 수수료율 합산
-  let extraFeeRate = (fees.ad ? 0.05 : 0) + (fees.megawari ? 0.11 : 0) + (fees.megapo ? 0.05 : 0);
-  let couponAddRate = 0; // 쿠폰은 별도 표기
-
-  // 마진 구간별 가격 계산
-  const tiers = [
-    { margin: 0.03, label: '최저가', sub: '0~3%' },
-    { margin: 0.07, label: '공격형', sub: '3~8%' },
-    { margin: 0.10, label: '추천 (기본)', sub: '10%' },
-    { margin: 0.15, label: '추천 (여유)', sub: '15%' },
-  ];
-
-  const rows = tiers.map(tier => {
-    const priceJPY = priceFromMargin(tier.margin, totalCostKRW, rateKRWperJPY);
-    const m = calcMargin(priceJPY, totalCostKRW, rateKRWperJPY, 0);
-    // 추가 수수료 적용 시 마진
-    const mExtra = extraFeeRate > 0 ? calcMargin(priceJPY, totalCostKRW, rateKRWperJPY, extraFeeRate) : null;
-    // 쿠폰 적용 시 추가 차감
-    let couponRate = 0;
-    if (fees.coupon) {
-      couponRate = getCouponRate(priceJPY);
-    }
-    const mAll = (extraFeeRate > 0 || fees.coupon) ? calcMargin(priceJPY, totalCostKRW, rateKRWperJPY, extraFeeRate + couponRate) : null;
-    const isRec = tier.margin >= 0.10 && tier.margin <= 0.15;
-    return { priceJPY, m, mAll, couponRate, isRec, label: tier.label, sub: tier.sub };
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('weight').addEventListener('input',function(){
+    this.classList.remove('af');
+    document.getElementById('whint').style.display='none';
   });
-
-  // 추천 등록가 = 추천(기본) 가격
-  lastResult = { finalPrice: rows[2].priceJPY, totalCostKRW, rateKRWperJPY };
-
-  const hasExtraFee = extraFeeRate > 0 || fees.coupon;
-  const extraFeeLabels = [
-    fees.ad ? '광고5%' : '',
-    fees.megawari ? '메가와리11%' : '',
-    fees.megapo ? '메가포5%' : '',
-    fees.coupon ? '쿠폰' : '',
-  ].filter(Boolean).join(' + ');
-
-  const html = `
-    <div class="card">
-      <div class="card-label">총비용 (원화 기준)</div>
-      <div class="row"><span class="row-label">원가</span><span class="row-val">${fmt(costKRW)}원</span></div>
-      <div class="row"><span class="row-label">배송비 (KSE ${methodLabel} ¥${fmtJPY(shippingJPY)})</span><span class="row-val">${fmt(shippingKRW)}원</span></div>
-      <div class="row"><span class="row-label">3PL비</span><span class="row-val">${fmt(threePlKRW)}원</span></div>
-      <div class="row bold"><span class="row-label">총비용</span><span class="row-val">${fmt(totalCostKRW)}원</span></div>
-      <div style="margin-top:8px;font-size:11px;color:var(--hint)">
-        마진 = 판매가 × 0.87 × ${rateKRWperJPY.toFixed(1)} − 총비용 &nbsp;|&nbsp; 마진율 = 마진 ÷ 판매가(원)
-      </div>
-    </div>
-
-    <div class="card" style="padding:0;overflow:hidden">
-      <div style="padding:12px 16px 8px;display:flex;align-items:center;justify-content:space-between">
-        <span class="card-label" style="margin:0">판매가 추천</span>
-        ${hasExtraFee ? `<span style="font-size:11px;color:var(--muted);background:var(--bg);padding:2px 8px;border-radius:20px;border:1px solid var(--border)">${extraFeeLabels} 적용 포함</span>` : ''}
-      </div>
-      <table style="width:100%;border-collapse:collapse;font-size:13px">
-        <thead>
-          <tr style="background:var(--bg);font-size:11px;color:var(--hint)">
-            <th style="padding:6px 16px;text-align:left;font-weight:500">구분</th>
-            <th style="padding:6px 8px;text-align:right;font-weight:500">판매가</th>
-            <th style="padding:6px 8px;text-align:right;font-weight:500">마진(원)</th>
-            <th style="padding:6px 8px;text-align:right;font-weight:500">마진율</th>
-            ${hasExtraFee ? '<th style="padding:6px 16px 6px 8px;text-align:right;font-weight:500">수수료후</th>' : ''}
-          </tr>
-        </thead>
-        <tbody>
-          ${rows.map(r => `
-            <tr style="border-top:1px solid var(--border);${r.isRec ? 'background:#f0faf6' : ''}">
-              <td style="padding:10px 16px">
-                <div style="font-weight:${r.isRec ? '600' : '400'};color:${r.isRec ? 'var(--green-dark)' : 'var(--text)'}">${r.label}</div>
-                <div style="font-size:11px;color:var(--hint)">${r.sub}</div>
-              </td>
-              <td style="padding:10px 8px;text-align:right;font-weight:600;font-size:15px;${r.isRec ? 'color:var(--accent)' : ''}">¥${fmtJPY(r.priceJPY)}</td>
-              <td style="padding:10px 8px;text-align:right;color:var(--muted)">${fmt(r.m.marginKRW)}원</td>
-              <td style="padding:10px 8px;text-align:right">
-                <span style="font-weight:600;color:${getMarginColor(r.m.marginRate)}">${r.m.marginRate.toFixed(1)}%</span>
-              </td>
-              ${hasExtraFee ? `<td style="padding:10px 16px 10px 8px;text-align:right">
-                <span style="font-weight:600;color:${getMarginColor(r.mAll ? r.mAll.marginRate : 0)}">${r.mAll ? r.mAll.marginRate.toFixed(1) + '%' : '-'}</span>
-                ${r.couponRate > 0 ? `<div style="font-size:10px;color:var(--hint)">쿠폰${(r.couponRate*100).toFixed(0)}%↓</div>` : ''}
-              </td>` : ''}
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </div>
-
-    <div class="card">
-      <div class="card-label">일본어 콘텐츠 생성</div>
-      <button class="btn btn-gen" id="genBtn" onclick="generate()">
-        <i class="ti ti-sparkles"></i> 일본어 콘텐츠 생성
-      </button>
-    </div>
-    <div id="contentOut"></div>
-  `;
-
-  document.getElementById('rightCol').innerHTML = html;
-}
-
-const SYSTEM_PROMPT = `あなたはQoo10 Japanに出品する韓国コスメの商品登録の専門家です。
-以下の日本の薬機法・景品表示法の規制に厳密に従って商品情報を生成してください。
-
-【禁止表現（絶対に使用しない）】
-治る、改善、再生、美白、シワ改善、抗酸化、強力な、実感
-
-【代替表現（積極的に使用）】
-肌を整える、肌のキメを整える、なめらかな肌印象へ、うるおいを与える、ハリのある印象へ、透明感のある印象へ、乾燥によるくすみに
-
-必ず以下のJSON形式で出力してください（他のテキスト不要）:
-{
-  "product_name_ja": "日本語商品名（ブランド名・成分・特徴を含む、50字以内）",
-  "thumbnail_copies": ["コピー1（20字以内）", "コピー2（20字以内）", "コピー3（20字以内）"],
-  "keywords": ["キーワード1","キーワード2","キーワード3","キーワード4","キーワード5","キーワード6","キーワード7","キーワード8","キーワード9","キーワード10"],
-  "html_description": "商品説明HTML（<h3>セクション見出し</h3><p>説明文</p>構造で、規制表現を守り、特徴・使い方・成分ポイントを含む）"
-}`;
-
-async function generate() {
-  const apiKey = localStorage.getItem('qoo10_apikey') || '';
-  if (!apiKey) { alert('상단 API Key 필드에 Anthropic API 키를 입력 후 저장해주세요.'); return; }
-  const productName = document.getElementById('productName').value;
-  if (!productName) { alert('상품명을 입력해주세요.'); return; }
-
-  const btn = document.getElementById('genBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="ti ti-loader spin"></i> 생성 중...';
-
-  try {
-    const userMsg = `상품명: ${productName}
-용량: ${document.getElementById('capacity').value}
-옵션 구성: ${document.getElementById('options').value || '없음'}
-추천 등록가: ¥${lastResult.finalPrice.toLocaleString('ja-JP')}
-특이사항: ${document.getElementById('specialNote').value || '없음'}
-이미지 주소: ${document.getElementById('imageUrls').value || '미제공'}
-위 정보를 바탕으로 Qoo10 Japan 등록용 일본어 상품 정보를 생성해주세요。`;
-
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: userMsg }]
-      })
-    });
-
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
-    const text = data.content.map(i => i.text || '').join('');
-    const clean = text.replace(/```json|```/g, '').trim();
-    const c = JSON.parse(clean);
-    renderContent(c);
-  } catch(e) {
-    alert('생성 오류: ' + e.message);
-  }
-
-  btn.disabled = false;
-  btn.innerHTML = '<i class="ti ti-sparkles"></i> 다시 생성';
-}
-
-function copyText(text, btnId) {
-  // Fallback copy for environments where clipboard API is blocked
-  try {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(() => flashCopy(btnId)).catch(() => fallbackCopy(text, btnId));
-    } else {
-      fallbackCopy(text, btnId);
-    }
-  } catch(e) { fallbackCopy(text, btnId); }
-}
-
-function fallbackCopy(text, btnId) {
-  const ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
-  document.body.appendChild(ta);
-  ta.focus();
-  ta.select();
-  try { document.execCommand('copy'); flashCopy(btnId); } catch(e) {}
-  document.body.removeChild(ta);
-}
-
-function flashCopy(btnId) {
-  const btn = document.getElementById(btnId);
-  if (!btn) return;
-  const orig = btn.innerHTML;
-  btn.innerHTML = '<i class="ti ti-check"></i> 복사됨';
-  btn.classList.add('ok');
-  setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('ok'); }, 1500);
-}
-
-function renderContent(c) {
-  const html = `
-    <div class="card">
-      <div class="badge-ok"><i class="ti ti-shield-check"></i> 약기법 금지어 필터 적용 완료</div>
-
-      <div style="margin-bottom:14px">
-        <div class="copy-row">
-          <span>상품명 (일본어)</span>
-          <button class="copy-btn" id="cp-name" onclick="copyText(${JSON.stringify(c.product_name_ja)},'cp-name')">
-            <i class="ti ti-copy"></i> 복사
-          </button>
-        </div>
-        <div class="name-box">${c.product_name_ja}</div>
-      </div>
-
-      <div style="margin-bottom:14px">
-        <div class="copy-row"><span>썸네일 카피 (3종)</span></div>
-        ${c.thumbnail_copies.map((t,i) => `
-          <div class="copy-pill">
-            <span>${t}</span>
-            <button class="copy-btn" id="cp-t${i}" onclick="copyText(${JSON.stringify(t)},'cp-t${i}')" style="flex-shrink:0;margin-left:8px">
-              <i class="ti ti-copy"></i>
-            </button>
-          </div>`).join('')}
-      </div>
-
-      <div style="margin-bottom:14px">
-        <div class="copy-row">
-          <span>검색 키워드 (10개)</span>
-          <button class="copy-btn" id="cp-kw" onclick="copyText(${JSON.stringify(c.keywords.join(', '))},'cp-kw')">
-            <i class="ti ti-copy"></i> 전체복사
-          </button>
-        </div>
-        <div class="kw-wrap">${c.keywords.map(k => `<span class="kw">${k}</span>`).join('')}</div>
-      </div>
-
-      <div>
-        <div class="copy-row">
-          <span>상품 설명 HTML</span>
-          <button class="copy-btn" id="cp-html" onclick="copyText(document.getElementById('htmlOut').value,'cp-html')">
-            <i class="ti ti-copy"></i> 복사
-          </button>
-        </div>
-        <textarea id="htmlOut" class="html-out" rows="9" readonly>${escHtml(c.html_description)}</textarea>
-      </div>
-    </div>
-  `;
-  document.getElementById('contentOut').innerHTML = html;
-}
-
-function escHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-// API key management
-function saveKey() {
-  const val = document.getElementById('apiKeyInput').value.trim();
-  if (!val) return;
-  localStorage.setItem('qoo10_apikey', val);
-  const saved = document.getElementById('apiSaved');
-  saved.style.display = 'flex';
-  setTimeout(() => saved.style.display = 'none', 2000);
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem('qoo10_apikey');
-  if (saved) {
-    document.getElementById('apiKeyInput').value = saved;
-    document.getElementById('apiSaved').style.display = 'flex';
-  }
 });
+
+function calcTier(totalCostJPY,fixedRate,margin){
+  if(1-fixedRate-margin<=0)return null;
+  let couponRate=0,price=totalCostJPY/(1-fixedRate-margin);
+  if(fees.coupon){
+    couponRate=getCouponRate(price);
+    let d=1-fixedRate-couponRate-margin;if(d<=0)return null;
+    price=totalCostJPY/d;
+    couponRate=getCouponRate(price);
+    d=1-fixedRate-couponRate-margin;if(d<=0)return null;
+    price=totalCostJPY/d;
+    couponRate=getCouponRate(price);
+  }
+  const fp=Math.ceil(price/10)*10;
+  const tfr=fixedRate+couponRate;
+  const feeJ=fp*tfr;
+  const marJ=fp-totalCostJPY-feeJ;
+  const marR=(marJ/fp)*100;
+  return{fp,feeJ,marJ,marR,couponRate,tfr};
+}
+
+function calc(){
+  const costKRW=parseFloat(document.getElementById('costKRW').value);
+  const weight=parseFloat(document.getElementById('weight').value);
+  const krw100=parseFloat(document.getElementById('rate').value)||930;
+  const extra=parseInt(document.getElementById('extraItems').value)||0;
+  const errEl=document.getElementById('err');
+  if(!costKRW||!weight){errEl.style.display='block';errEl.textContent='원가와 무게를 입력해주세요.';return;}
+  errEl.style.display='none';
+  const rate=100/krw100;
+  const costJ=costKRW*rate;
+  const shipJ=getShip(weight,method);
+  const tplKRW=900+extra*50;
+  const tplJ=tplKRW*rate;
+  const totalJ=costJ+shipJ+tplJ;
+  const baseR=getBase();
+  const fixedRate=baseR+(fees.ad?getR('ad')/100:0)+(fees.megawari?getR('megawari')/100:0)+(fees.megapo?getR('megapo')/100:0);
+  const tiers=[
+    {label:'손익분기',tag:'brk',margin:0.00},
+    {label:'최저가',  tag:'min',margin:0.03},
+    {label:'공격형',  tag:'agg',margin:0.06},
+    {label:'기본',    tag:'bas',margin:0.10},
+    {label:'추천 ★', tag:'rec',margin:0.13},
+    {label:'여유',    tag:'com',margin:0.16},
+  ];
+  const computed=tiers.map(t=>({...t,...calcTier(totalJ,fixedRate,t.margin)}));
+  calcResult={computed,costJ,shipJ,tplJ,tplKRW,totalJ,fixedRate,krw100,baseR};
+  selIdx=4;genContent=null;
+  renderRight();
+}
+
+const BC={brk:'b-brk',min:'b-min',agg:'b-agg',bas:'b-bas',rec:'b-rec',com:'b-com'};
+const mc=r=>r>8?'mp':r>0?'mp':r===0?'mz':'mn';
+
+function renderRight(){
+  const p=document.getElementById('right');
+  if(!calcResult)return;
+  const{computed,costJ,shipJ,tplJ,tplKRW,totalJ,fixedRate,krw100,baseR}=calcResult;
+  const sel=computed[selIdx];
+  const marKRW=sel.marJ!=null?Math.round(sel.marJ*krw100/100):0;
+  const shipLabel=method==='sea'?'KSE 해상':method==='air'?'KSE 항공':'KSE 소형';
+  const feeBreakdown=[];
+  feeBreakdown.push(`기본 ${(baseR*100).toFixed(0)}%`);
+  if(fees.ad)feeBreakdown.push(`광고 ${getR('ad')}%`);
+  if(fees.megawari)feeBreakdown.push(`메가와리 ${getR('megawari')}%`);
+  if(fees.megapo)feeBreakdown.push(`메가포 ${getR('megapo')}%`);
+  if(fees.coupon&&sel.couponRate>0)feeBreakdown.push(`쿠폰 ${(sel.couponRate*100).toFixed(0)}% 역산`);
+  else if(fees.coupon)feeBreakdown.push('쿠폰 0% (¥3,000 미만)');
+
+  const rows=computed.map((t,i)=>{
+    if(!t.fp)return '';
+    const s=i===selIdx;
+    return`<tr class="tier-row${s?' tr-sel':''}" onclick="selTier(${i})">
+      <td><span class="tbadge ${BC[t.tag]}">${t.label}</span>${s?'<span style="font-size:10px;color:var(--accent);margin-left:4px"><i class="ti ti-check"></i></span>':''}</td>
+      <td><span class="pval">¥${t.fp.toLocaleString()}</span></td>
+      <td><span class="mval ${mc(t.marR)}">${(t.marR??0).toFixed(1)}%</span></td>
+      <td style="font-size:12px;color:var(--muted)">¥${Math.round(t.marJ??0).toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+
+  p.innerHTML=`
+  <div class="card">
+    <div class="slabel">비용 분석</div>
+    <div class="irow"><span style="color:var(--muted)">원가</span><span style="color:var(--muted)">¥${Math.round(costJ).toLocaleString()} <span style="font-size:11px">(${krw100}원/100¥)</span></span></div>
+    <div class="irow"><span style="color:var(--muted)">${shipLabel} 배송비</span><span style="color:var(--muted)">¥${shipJ.toLocaleString()}</span></div>
+    <div class="irow"><span style="color:var(--muted)">3PL비 (${tplKRW.toLocaleString()}원)</span><span style="color:var(--muted)">¥${Math.round(tplJ).toLocaleString()}</span></div>
+    <div class="irow"><span style="font-weight:500">총원가</span><span style="font-weight:600">¥${Math.round(totalJ).toLocaleString()}</span></div>
+    <div class="irow" style="border:none;padding-top:4px;flex-wrap:wrap;gap:4px">
+      ${feeBreakdown.map(f=>`<span class="badge">${f}</span>`).join('')}
+    </div>
+  </div>
+  <div class="card">
+    <div class="slabel">마진 시뮬레이션 · 행 클릭으로 선택</div>
+    <table class="ptable">
+      <thead><tr><th>구분</th><th>등록가</th><th>마진율</th><th>마진(¥)</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="margin-top:10px;font-size:11px;color:var(--muted);line-height:1.6">
+      마진율 = 마진 ÷ 판매가 &nbsp;·&nbsp; 마진 = 판매가 × (1−수수료) − 총원가
+    </div>
+  </div>
+  <div class="card">
+    <div class="slabel">선택된 등록가</div>
+    <div class="sel-box">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">등록가 &nbsp;<span class="tbadge ${BC[sel.tag]}">${sel.label}</span></div>
+      <div class="sel-price">¥${sel.fp?.toLocaleString()??'-'}</div>
+      <div class="sel-mrow">
+        <span style="font-size:13px;color:var(--green);font-weight:500">${(sel.marR??0).toFixed(1)}%</span>
+        <span style="font-size:13px;color:var(--green);font-weight:500">¥${Math.round(sel.marJ??0).toLocaleString()}</span>
+        <span style="font-size:12px;color:var(--muted)">≈ ${marKRW.toLocaleString()}원</span>
+        ${fees.coupon&&sel.couponRate>0?`<span style="font-size:11px;color:var(--muted)">쿠폰 ${(sel.couponRate*100).toFixed(0)}% 적용</span>`:''}
+      </div>
+    </div>
+    <div class="slabel" style="margin-bottom:8px">일본어 콘텐츠 생성</div>
+    ${!document.getElementById('productName').value.trim()
+      ?'<p style="font-size:13px;color:var(--muted);margin:0">상품명을 먼저 입력해주세요.</p>'
+      :`<button class="btn-gen" id="genBtn" onclick="generate()"><i class="ti ti-sparkles"></i> 일본어 콘텐츠 생성 ↗</button>`}
+  </div>
+  ${genContent?renderContent():''}`;
+}
+
+function selTier(i){selIdx=i;renderRight();}
+
+const SYS=`あなたはQoo10 Japanに出品する韓国コスメの商品登録の専門家です。薬機法・景品表示法を厳守してください。
+【禁止】治る、改善、再生、美白、シワ改善、抗酸化、強力な、実感
+【代替】肌を整える、肌のキメを整える、なめらかな肌印象へ、うるおいを与える、ハリのある印象へ、透明感のある印象へ
+JSON形式のみで出力（前後テキスト不要）:
+{"product_name_ja":"50字以内","thumbnail_copies":["20字以内","20字以内","20字以内"],"keywords":["kw1","kw2","kw3","kw4","kw5","kw6","kw7","kw8","kw9","kw10"],"html_description":"HTML"}`;
+
+async function generate(){
+  if(!calcResult)return;
+  const pn=document.getElementById('productName').value.trim();
+  if(!pn)return;
+  const sel=calcResult.computed[selIdx];
+  const btn=document.getElementById('genBtn');
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader spin"></i> 생성 중...';}
+  try{
+    const msg=`상품명:${pn}\n용량:${document.getElementById('capacity').value||'미입력'}\n옵션:${document.getElementById('options').value||'없음'}\n등록가:¥${sel?.fp?.toLocaleString()??'-'}(마진${(sel?.marR??0).toFixed(1)}%)\n특이사항:${document.getElementById('specialNote').value||'없음'}\n이미지:${document.getElementById('imageUrls').value||'미제공'}\nQoo10 Japan용 일본어 상품 정보를 생성해주세요。`;
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYS,messages:[{role:'user',content:msg}]})
+    });
+    const d=await res.json();
+    const txt=(d.content||[]).map(x=>x.text||'').join('');
+    genContent=JSON.parse(txt.replace(/```json|```/g,'').trim());
+  }catch(e){alert('생성 오류: '+e.message);}
+  renderRight();
+}
+
+function renderContent(){
+  const c=genContent;if(!c)return '';
+  return`<div class="card" style="display:flex;flex-direction:column;gap:14px">
+    <div class="slabel" style="margin-bottom:0">등록 정보</div>
+    <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--gl);border-radius:var(--rs)">
+      <i class="ti ti-shield-check" style="font-size:13px;color:var(--gd)"></i>
+      <span style="font-size:11px;color:var(--gd);font-weight:500">약기법 금지어 필터 적용 완료</span>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span style="font-size:11px;color:var(--muted)">상품명 (일본어)</span>
+        <button onclick="cp('${ej(c.product_name_ja)}','nb')" id="nb"
+          style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:3px">
+          <i class="ti ti-copy" style="font-size:11px"></i> 복사</button>
+      </div>
+      <div style="font-size:13px;font-weight:500;padding:8px 10px;background:var(--bg);border-radius:var(--rs);line-height:1.5">${c.product_name_ja}</div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">썸네일 카피 (3종)</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        ${(c.thumbnail_copies||[]).map((x,i)=>`<div class="copy-pill"><span>${x}</span>
+          <button onclick="cp('${ej(x)}','cp${i}')" id="cp${i}" style="font-size:11px;color:var(--gd);background:none;border:none;cursor:pointer">
+            <i class="ti ti-copy" style="font-size:11px"></i></button></div>`).join('')}
+      </div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:11px;color:var(--muted)">검색 키워드 (10개)</span>
+        <button onclick="cp('${ej((c.keywords||[]).join(', '))}','kb')" id="kb"
+          style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:3px">
+          <i class="ti ti-copy" style="font-size:11px"></i> 전체복사</button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">
+        ${(c.keywords||[]).map(k=>`<span class="badge">${k}</span>`).join('')}
+      </div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span style="font-size:11px;color:var(--muted)">상품 설명 HTML</span>
+        <button onclick="cp(document.getElementById('ho').value,'hb')" id="hb"
+          style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:3px">
+          <i class="ti ti-copy" style="font-size:11px"></i> 복사</button>
+      </div>
+      <textarea id="ho" readonly rows="8"
+        style="width:100%;font-family:monospace;font-size:11px;color:var(--muted);border:1px solid var(--border);border-radius:var(--rs);padding:8px;resize:vertical"
+      >${eh(c.html_description)}</textarea>
+    </div>
+  </div>`;
+}
+
+function cp(t,id){
+  navigator.clipboard.writeText(t).then(()=>{
+    const b=document.getElementById(id);if(!b)return;
+    const o=b.innerHTML;
+    b.innerHTML='<i class="ti ti-check" style="font-size:11px;color:var(--green)"></i> 복사됨';
+    setTimeout(()=>{b.innerHTML=o;},1500);
+  });
+}
+function ej(s){return(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n');}
+function eh(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 </script>
-
-
-</body></html>
+</body>
+</html>
