@@ -163,6 +163,7 @@ body{font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
     <div class="card">
       <div class="slabel">상품 정보</div>
       <div class="field"><label>상품명 (한국어)</label><input id="productName" placeholder=""/></div>
+      <div class="field"><label>브랜드 (한국어)</label><input id="brandName" placeholder="나로덤"/></div>
       <div class="g2">
         <div class="field" style="margin-bottom:0">
           <label>용량</label>
@@ -175,8 +176,8 @@ body{font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
         </div>
       </div>
       <div style="height:8px"></div>
-      <div class="field"><label>옵션 구성</label><input id="options" placeholder="선셋 / 퓨어 / 샤인"/></div>
-      <div class="field"><label>이미지 URL (옵션)</label><textarea id="imageUrls" rows="2" placeholder="선셋: URL&#10;퓨어: URL"></textarea></div>
+      <div class="field"><label>옵션 구성</label><input id="options" placeholder="A / B / C"/></div>
+      <div class="field"><label>이미지 URL (옵션)</label><textarea id="imageUrls" rows="2" placeholder="A: URL&#10;B: URL"></textarea></div>
       <div class="field" style="margin-bottom:0"><label>특이사항</label><input id="specialNote" placeholder="각 옵션 원가 동일"/></div>
     </div>
 
@@ -468,10 +469,59 @@ function renderRight(){
 function selTier(i){selIdx=i;renderRight();}
 
 const SYS=`あなたはQoo10 Japanに出品する韓国コスメの商品登録の専門家です。薬機法・景品表示法を厳守してください。
-【禁止】治る、改善、再生、美白、シワ改善、抗酸化、強力な、実感
+【禁止】治る、改善、再生、美白、シワ改善、抗酸化、強力な、実感、最高、No.1、必ず、絶対、医学的、即効
 【代替】肌を整える、肌のキメを整える、なめらかな肌印象へ、うるおいを与える、ハリのある印象へ、透明感のある印象へ
-JSON形式のみで出力（前後テキスト不要）:
-{"product_name_ja":"50字以内","thumbnail_copies":["20字以内","20字以内","20字以内"],"keywords":["kw1","kw2","kw3","kw4","kw5","kw6","kw7","kw8","kw9","kw10"],"html_description":"HTML"}`;
+
+# html_descriptionの構成（この順序・スタイルを厳守）
+全体を <div style="max-width:600px;margin:0 auto;font-family:'Hiragino Sans','Noto Sans JP',sans-serif;color:#1a1a1a"> でラップ。
+
+## ① 冒頭フッキング（画像の上）
+顧客が「これ、私のことだ…」と共感する具体的なシーン・悩みを書く。季節・年齢・生活シーンなど。誇大表現NG、共感ベースで2〜3行。
+<div style="text-align:center;padding:30px 20px 10px">
+  <p style="font-size:13px;letter-spacing:3px;color:#888;margin:0 0 12px">[商品の英語名 or 短い英語タグライン]</p>
+  <h2 style="font-size:26px;font-weight:700;line-height:1.4;margin:0 0 16px;color:#1a1a1a">[商品の日本語名 or 力強いフックタイトル]</h2>
+  <p style="font-size:15px;line-height:1.8;color:#555;margin:0">[共感の悩み・シーン文・2〜3行・改行は<br>]</p>
+</div>
+
+## ② 商品画像エリア
+提供されたimage_urlsがあれば配置。複数なら縦並び。
+<div style="text-align:center;margin:24px 0"><img src="[URL]" alt="商品画像" style="max-width:100%;height:auto;border-radius:8px"></div>
+画像が未提供ならこのブロック自体を省略。
+
+## ③ サブフック（画像の下、任意・1行）
+<p style="text-align:center;font-size:16px;font-weight:600;color:#d85a30;margin:20px 0 40px;letter-spacing:1px">[ブランドカラーで響かせる1行]</p>
+
+## ④ POINTセクション（3〜4個・必須）
+商品の特長・成分・テクスチャー・使用感・試験完了・製造へのこだわり等から3〜4個。各POINTは以下のテンプレート（番号は連番）:
+<div style="text-align:center;margin:50px 0">
+  <span style="display:inline-block;background:#d85a30;color:#fff;padding:7px 22px;border-radius:30px;font-weight:700;font-size:13px;letter-spacing:2px">POINT 1</span>
+  <h3 style="font-size:22px;font-weight:700;margin:16px 0 10px;color:#1a1a1a;line-height:1.4">[特長タイトル・力強く]</h3>
+  <p style="font-size:14px;color:#666;line-height:1.8;margin:0;padding:0 20px">[1〜2行の説明・効果断定NG]</p>
+</div>
+
+## ⑤ 使用方法（HOW TO USE）
+<div style="text-align:center;margin:60px 0 40px">
+  <h3 style="font-size:22px;font-weight:300;letter-spacing:6px;margin:0 0 14px;color:#1a1a1a">HOW TO USE</h3>
+  <p style="font-size:14px;color:#666;line-height:1.8;margin:0;padding:0 20px">[使い方を1〜2文で簡潔に]</p>
+</div>
+
+## ⑥ 商品情報テーブル（最下部・必須・以下テンプレ厳守）
+<div style="margin-top:50px;padding-top:24px;border-top:2px solid #1a1a1a">
+  <h3 style="font-weight:700;font-size:15px;margin:0 0 14px;color:#1a1a1a">商品情報</h3>
+  <table style="width:100%;border-collapse:collapse;font-size:13px;border-top:1px solid #e0e0e0">
+    <tr style="border-bottom:1px solid #e0e0e0"><td style="background:#fafafa;padding:14px 16px;width:130px;color:#666;vertical-align:middle">商品名</td><td style="padding:14px 16px;color:#1a1a1a">{product_name_ja}</td></tr>
+    <tr style="border-bottom:1px solid #e0e0e0"><td style="background:#fafafa;padding:14px 16px;color:#666;vertical-align:middle">ブランド</td><td style="padding:14px 16px;color:#1a1a1a">{ブランド日本語（英語表記）}</td></tr>
+    <tr style="border-bottom:1px solid #e0e0e0"><td style="background:#fafafa;padding:14px 16px;color:#666;vertical-align:middle">内容量</td><td style="padding:14px 16px;color:#1a1a1a">{容量}</td></tr>
+    <tr style="border-bottom:1px solid #e0e0e0"><td style="background:#fafafa;padding:14px 16px;color:#666;vertical-align:middle">商品タイプ</td><td style="padding:14px 16px;color:#1a1a1a">{美容液・アンプル/クリーム/トナー/マスクシート等を商品名から推測}</td></tr>
+    <tr style="border-bottom:1px solid #e0e0e0"><td style="background:#fafafa;padding:14px 16px;color:#666;vertical-align:middle">おすすめ肌タイプ</td><td style="padding:14px 16px;color:#1a1a1a">{乾燥が気になる肌、ツヤ不足が気になる肌、キメを整えたい肌 など複数を読点区切り}</td></tr>
+    <tr style="border-bottom:1px solid #e0e0e0"><td style="background:#fafafa;padding:14px 16px;color:#666;vertical-align:middle">重量（梱包込）</td><td style="padding:14px 16px;color:#1a1a1a">約{重量}g</td></tr>
+    <tr><td style="background:#fafafa;padding:14px 16px;color:#666;vertical-align:middle">原産国</td><td style="padding:14px 16px;color:#1a1a1a">大韓民国</td></tr>
+  </table>
+</div>
+
+# 出力形式
+JSON形式のみで出力（前後テキスト・コードブロック不要）:
+{"product_name_ja":"50字以内","thumbnail_copies":["20字以内","20字以内","20字以内"],"keywords":["kw1","kw2","kw3","kw4","kw5","kw6","kw7","kw8","kw9","kw10"],"html_description":"上記①〜⑥を全て含む完全なHTML（最外側はラップdiv）"}`;
 
 async function generate(){
   if(!calcResult)return;
@@ -488,7 +538,10 @@ async function generate(){
   const btn=document.getElementById('genBtn');
   if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader spin"></i> 생성 중...';}
   try{
-    const msg=`상품명:${pn}\n용량:${document.getElementById('capacity').value||'미입력'}\n옵션:${document.getElementById('options').value||'없음'}\n등록가:¥${sel?.fp?.toLocaleString()??'-'}(마진${(sel?.marR??0).toFixed(1)}%)\n특이사항:${document.getElementById('specialNote').value||'없음'}\n이미지:${document.getElementById('imageUrls').value||'미제공'}\nQoo10 Japan용 일본어 상품 정보를 생성해주세요。`;
+    const brandName=document.getElementById('brandName').value.trim()||'未入力';
+    const weightKg=parseFloat(document.getElementById('weight').value)||0;
+    const weightG=Math.round(weightKg*1000);
+    const msg=`商品名（韓国語）:${pn}\nブランド（韓国語）:${brandName}\n容量:${document.getElementById('capacity').value||'未入力'}\n重量（梱包込・グラム）:${weightG}g\nオプション:${document.getElementById('options').value||'なし'}\n登録価格:¥${sel?.fp?.toLocaleString()??'-'}（マージン${(sel?.marR??0).toFixed(1)}%）\n特記事項:${document.getElementById('specialNote').value||'なし'}\n画像URL:${document.getElementById('imageUrls').value||'未提供'}\n\nQoo10 Japan用の日本語商品情報を生成してください。html_descriptionは指定された①〜⑥の構成（冒頭フッキング→画像→サブフック→POINT 3〜4個→HOW TO USE→商品情報テーブル）を必ず守り、最外側を max-width:600px のラップdivで包んでください。商品情報テーブルの「重量（梱包込）」には「約${weightG}g」を入れてください。`;
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{
@@ -497,7 +550,7 @@ async function generate(){
         'anthropic-version':'2023-06-01',
         'anthropic-dangerous-direct-browser-access':'true'
       },
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,system:SYS,messages:[{role:'user',content:msg}]})
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:5000,system:SYS,messages:[{role:'user',content:msg}]})
     });
     if(!res.ok){
       const errText=await res.text();
@@ -553,13 +606,20 @@ function renderContent(){
     <div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
         <span style="font-size:11px;color:var(--muted)">상품 설명 HTML</span>
-        <button onclick="cp(document.getElementById('ho').value,'hb')" id="hb"
-          style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:3px">
-          <i class="ti ti-copy" style="font-size:11px"></i> 복사</button>
+        <div style="display:flex;gap:8px">
+          <button onclick="togglePreview()" id="pvb"
+            style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:3px">
+            <i class="ti ti-eye" style="font-size:11px"></i> 미리보기</button>
+          <button onclick="cp(document.getElementById('ho').value,'hb')" id="hb"
+            style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:3px">
+            <i class="ti ti-copy" style="font-size:11px"></i> 복사</button>
+        </div>
       </div>
       <textarea id="ho" readonly rows="8"
         style="width:100%;font-family:monospace;font-size:11px;color:var(--muted);border:1px solid var(--border);border-radius:var(--rs);padding:8px;resize:vertical"
       >${eh(c.html_description)}</textarea>
+      <iframe id="pvframe" srcdoc="${eh(c.html_description).replace(/"/g,'&quot;')}"
+        style="display:none;width:100%;height:600px;border:1px solid var(--border);border-radius:var(--rs);margin-top:8px;background:#fff"></iframe>
     </div>
   </div>`;
 }
@@ -574,6 +634,20 @@ function cp(t,id){
 }
 function ej(s){return(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n');}
 function eh(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function togglePreview(){
+  const f=document.getElementById('pvframe');
+  const t=document.getElementById('ho');
+  const b=document.getElementById('pvb');
+  const showing=f.style.display!=='none';
+  if(showing){
+    f.style.display='none';t.style.display='block';
+    b.innerHTML='<i class="ti ti-eye" style="font-size:11px"></i> 미리보기';
+  }else{
+    f.style.display='block';t.style.display='none';
+    b.innerHTML='<i class="ti ti-code" style="font-size:11px"></i> 코드 보기';
+  }
+}
 
 function toggleApiPanel(){
   document.getElementById('apiPanel').classList.toggle('on');
