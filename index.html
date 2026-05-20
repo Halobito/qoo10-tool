@@ -163,7 +163,7 @@ body{font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
     <div class="card">
       <div class="slabel">상품 정보</div>
       <div class="field"><label>상품명 (한국어)</label><input id="productName" placeholder=""/></div>
-      <div class="field"><label>브랜드 (한국어)</label><input id="brandName" placeholder="나로덤"/></div>
+      <div class="field"><label>브랜드 (한국어)</label><input id="brandName" placeholder=""/></div>
       <div class="g2">
         <div class="field" style="margin-bottom:0">
           <label>용량</label>
@@ -176,8 +176,11 @@ body{font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
         </div>
       </div>
       <div style="height:8px"></div>
-      <div class="field"><label>옵션 구성</label><input id="options" placeholder="A / B / C"/></div>
-      <div class="field"><label>이미지 URL (옵션)</label><textarea id="imageUrls" rows="2" placeholder="A: URL&#10;B: URL"></textarea></div>
+      <div class="field"><label>옵션 구성</label><input id="options" placeholder="A / B / C" oninput="renderImageInputs()"/></div>
+      <div class="field">
+        <label>이미지 URL (옵션) <span id="imageUrlsHint" style="font-size:10px;color:var(--hint);font-weight:normal"></span></label>
+        <div id="imageUrlsContainer" style="display:flex;flex-direction:column;gap:4px"></div>
+      </div>
       <div class="field" style="margin-bottom:0"><label>특이사항</label><input id="specialNote" placeholder="각 옵션 원가 동일"/></div>
     </div>
 
@@ -333,11 +336,47 @@ function onCapInput(v){
   el.value=kg.toFixed(2);el.classList.add('af');
   document.getElementById('whint').style.display='block';
 }
+
+function parseOptions(str){
+  if(!str||!str.trim())return [];
+  return str.split(/[\/,·]/).map(s=>s.trim()).filter(Boolean);
+}
+
+function renderImageInputs(){
+  const container=document.getElementById('imageUrlsContainer');
+  const hint=document.getElementById('imageUrlsHint');
+  const opts=parseOptions(document.getElementById('options').value);
+  const existing={};
+  container.querySelectorAll('input[data-opt]').forEach(inp=>{existing[inp.dataset.opt]=inp.value;});
+  const inputStyle="flex:1;min-width:0;font-size:13px;padding:6px 8px;border:1px solid var(--border2);border-radius:var(--rs);background:#fff;color:var(--text);font-family:inherit";
+  if(opts.length===0){
+    hint.textContent='· 옵션 입력 시 옵션 수만큼 자동 생성';
+    container.innerHTML=`<input data-opt="기본" type="text" placeholder="이미지 URL" value="${(existing['기본']||'').replace(/"/g,'&quot;')}" style="${inputStyle}"/>`;
+    return;
+  }
+  hint.textContent=`· 옵션 ${opts.length}개 감지`;
+  container.innerHTML=opts.map(opt=>`
+    <div style="display:flex;align-items:center;gap:6px">
+      <span style="font-size:12px;color:var(--muted);min-width:50px;flex-shrink:0;text-align:right">${opt}:</span>
+      <input data-opt="${opt.replace(/"/g,'&quot;')}" type="text" placeholder="이미지 URL" value="${(existing[opt]||'').replace(/"/g,'&quot;')}" style="${inputStyle}"/>
+    </div>`).join('');
+}
+
+function getImageUrls(){
+  const inputs=document.querySelectorAll('#imageUrlsContainer input[data-opt]');
+  const pairs=[];
+  inputs.forEach(inp=>{
+    const v=inp.value.trim();
+    if(v)pairs.push(`${inp.dataset.opt}: ${v}`);
+  });
+  return pairs.join('\n');
+}
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('weight').addEventListener('input',function(){
     this.classList.remove('af');
     document.getElementById('whint').style.display='none';
   });
+  renderImageInputs();
 });
 
 function calcTier(totalCostJPY,fixedRate,margin){
@@ -484,9 +523,12 @@ const SYS=`あなたはQoo10 Japanに出品する韓国コスメの商品登録�
 </div>
 
 ## ② 商品画像エリア
-提供されたimage_urlsがあれば配置。複数なら縦並び。
-<div style="text-align:center;margin:24px 0"><img src="[URL]" alt="商品画像" style="max-width:100%;height:auto;border-radius:8px"></div>
-画像が未提供ならこのブロック自体を省略。
+提供された画像URLがあれば配置。「オプション名: URL」形式で複数提供された場合は、オプションごとにキャプション付きで縦並びに配置:
+<div style="text-align:center;margin:24px 0">
+  <img src="[URL]" alt="[オプション名]" style="max-width:100%;height:auto;border-radius:8px"/>
+  <p style="font-size:13px;color:#666;margin:8px 0 0;letter-spacing:1px">[オプション名]</p>
+</div>
+オプション名が「기본」または1つだけの場合はキャプションを省略可。画像URLが未提供ならこのブロック自体を省略。
 
 ## ③ サブフック（画像の下、任意・1行）
 <p style="text-align:center;font-size:16px;font-weight:600;color:#d85a30;margin:20px 0 40px;letter-spacing:1px">[ブランドカラーで響かせる1行]</p>
@@ -519,9 +561,15 @@ const SYS=`あなたはQoo10 Japanに出品する韓国コスメの商品登録�
   </table>
 </div>
 
+# 検索キーワード（重要）
+- 15個生成すること（kw1〜kw15）。
+- ブランド名（韓国語・日本語・英語表記すべて）はキーワードに含めない。例: 「ナロデルム」「Naro-derm」「나로덤」等は不可。
+- 商品カテゴリ・成分・効能イメージ・肌悩み・使用シーン・ターゲット層など、ブランド非依存の検索語で構成する。
+- 日本のユーザーが実際に検索しそうな自然な日本語キーワード（カタカナ・漢字・ひらがな混在可）。
+
 # 出力形式
 JSON形式のみで出力（前後テキスト・コードブロック不要）:
-{"product_name_ja":"50字以内","thumbnail_copies":["20字以内","20字以内","20字以内"],"keywords":["kw1","kw2","kw3","kw4","kw5","kw6","kw7","kw8","kw9","kw10"],"html_description":"上記①〜⑥を全て含む完全なHTML（最外側はラップdiv）"}`;
+{"product_name_ja":"50字以内","thumbnail_copies":["20字以内","20字以内","20字以内"],"keywords":["kw1","kw2","kw3","kw4","kw5","kw6","kw7","kw8","kw9","kw10","kw11","kw12","kw13","kw14","kw15"],"html_description":"上記①〜⑥を全て含む完全なHTML（最外側はラップdiv）"}`;
 
 async function generate(){
   if(!calcResult)return;
@@ -541,7 +589,8 @@ async function generate(){
     const brandName=document.getElementById('brandName').value.trim()||'未入力';
     const weightKg=parseFloat(document.getElementById('weight').value)||0;
     const weightG=Math.round(weightKg*1000);
-    const msg=`商品名（韓国語）:${pn}\nブランド（韓国語）:${brandName}\n容量:${document.getElementById('capacity').value||'未入力'}\n重量（梱包込・グラム）:${weightG}g\nオプション:${document.getElementById('options').value||'なし'}\n登録価格:¥${sel?.fp?.toLocaleString()??'-'}（マージン${(sel?.marR??0).toFixed(1)}%）\n特記事項:${document.getElementById('specialNote').value||'なし'}\n画像URL:${document.getElementById('imageUrls').value||'未提供'}\n\nQoo10 Japan用の日本語商品情報を生成してください。html_descriptionは指定された①〜⑥の構成（冒頭フッキング→画像→サブフック→POINT 3〜4個→HOW TO USE→商品情報テーブル）を必ず守り、最外側を max-width:600px のラップdivで包んでください。商品情報テーブルの「重量（梱包込）」には「約${weightG}g」を入れてください。`;
+    const imageUrlsStr=getImageUrls();
+    const msg=`商品名（韓国語）:${pn}\nブランド（韓国語）:${brandName}\n容量:${document.getElementById('capacity').value||'未入力'}\n重量（梱包込・グラム）:${weightG}g\nオプション:${document.getElementById('options').value||'なし'}\n登録価格:¥${sel?.fp?.toLocaleString()??'-'}（マージン${(sel?.marR??0).toFixed(1)}%）\n特記事項:${document.getElementById('specialNote').value||'なし'}\n画像URL（オプション別）:\n${imageUrlsStr||'未提供'}\n\nQoo10 Japan用の日本語商品情報を生成してください。html_descriptionは指定された①〜⑥の構成（冒頭フッキング→画像→サブフック→POINT 3〜4個→HOW TO USE→商品情報テーブル）を必ず守り、最外側を max-width:600px のラップdivで包んでください。複数の画像URLが提供された場合は、②商品画像エリアでオプション名のキャプション付きで縦並びに配置してください。商品情報テーブルの「重量（梱包込）」には「約${weightG}g」を入れてください。`;
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{
@@ -594,7 +643,7 @@ function renderContent(){
     </div>
     <div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <span style="font-size:11px;color:var(--muted)">검색 키워드 (10개)</span>
+        <span style="font-size:11px;color:var(--muted)">검색 키워드 (15개)</span>
         <button onclick="cp('${ej((c.keywords||[]).join(', '))}','kb')" id="kb"
           style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:3px">
           <i class="ti ti-copy" style="font-size:11px"></i> 전체복사</button>
