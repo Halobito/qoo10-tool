@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -110,6 +109,23 @@ body{font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
   padding:2.5rem 1.5rem;text-align:center}
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 .spin{animation:spin 1s linear infinite}
+
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:6px}
+.api-btn{display:flex;align-items:center;gap:4px;padding:5px 10px;font-size:11px;font-weight:500;
+  background:var(--bg);border:.5px solid var(--border);border-radius:var(--rs);
+  color:var(--muted);cursor:pointer;transition:all .15s}
+.api-btn:hover{background:#ebe9e2}
+.api-btn.set{background:var(--gl);color:var(--gd);border-color:var(--gd)}
+.api-panel{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 20px;display:none}
+.api-panel.on{display:block}
+.api-panel-inner{max-width:960px;margin:0 auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.api-input{flex:1;min-width:200px;padding:5px 8px;font-size:12px;font-family:monospace;
+  border:1px solid var(--border2);border-radius:var(--rs);background:#fff}
+.api-input:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+.api-save{padding:5px 12px;font-size:12px;font-weight:500;background:var(--gdp);color:#fff;
+  border:none;border-radius:var(--rs);cursor:pointer}
+.api-save:hover{opacity:.9}
+.api-note{font-size:11px;color:var(--muted);max-width:960px;margin:6px auto 0;line-height:1.5}
 </style>
 </head>
 <body>
@@ -119,6 +135,25 @@ body{font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
   <div>
     <div class="hdr-title">큐텐재팬 셀러 어시스턴트</div>
     <div class="hdr-sub">원가 입력 → 마진 시뮬레이션 → 일본어 콘텐츠 생성</div>
+  </div>
+  <div class="hdr-right">
+    <button class="api-btn" id="apiBtn" onclick="toggleApiPanel()">
+      <i class="ti ti-key"></i> <span id="apiBtnLabel">API 키 설정</span>
+    </button>
+  </div>
+</div>
+
+<div class="api-panel" id="apiPanel">
+  <div class="api-panel-inner">
+    <i class="ti ti-key" style="color:var(--muted)"></i>
+    <input class="api-input" id="apiKey" type="password" placeholder="sk-ant-api03-... (Anthropic API 키 입력)" autocomplete="off"/>
+    <button class="api-save" onclick="saveApiKey()">저장</button>
+    <button class="api-save" style="background:var(--bg);color:var(--muted);border:.5px solid var(--border)" onclick="clearApiKey()">삭제</button>
+    <span id="apiKeyStatus" style="font-size:11px;color:var(--gd);font-weight:500"></span>
+  </div>
+  <div class="api-note">
+    ※ 키는 본인 브라우저(localStorage)에만 저장됩니다. 외부로 전송되지 않으며, Anthropic API에 직접 호출됩니다.
+    키 발급: <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--gd)">console.anthropic.com</a>
   </div>
 </div>
 
@@ -170,6 +205,20 @@ body{font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
           style="width:40px;font-size:12px;padding:1px 4px;border:1px solid var(--border2);border-radius:4px;text-align:right"
           onclick="event.stopPropagation()"/>
         <span style="font-size:11px">% (고정)</span>
+      </div>
+      <div style="padding:6px 10px;border-radius:var(--rs);background:var(--bg);font-size:12px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:6px">
+        <i class="ti ti-truck-delivery" style="font-size:11px"></i> 추가 배송비
+        <input id="extraShipKRW" type="number" value="0" min="0" step="100" placeholder="0"
+          style="width:80px;font-size:12px;padding:1px 4px;border:1px solid var(--border2);border-radius:4px;text-align:right"
+          onclick="event.stopPropagation()"/>
+        <span style="font-size:11px">원 (KRW · 총원가에 합산)</span>
+      </div>
+      <div style="padding:6px 10px;border-radius:var(--rs);background:var(--bg);font-size:12px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:6px">
+        <i class="ti ti-package" style="font-size:11px"></i> 추가 포장비
+        <input id="extraPackKRW" type="number" value="0" min="0" step="100" placeholder="0"
+          style="width:80px;font-size:12px;padding:1px 4px;border:1px solid var(--border2);border-radius:4px;text-align:right"
+          onclick="event.stopPropagation()"/>
+        <span style="font-size:11px">원 (KRW · 총원가에 합산)</span>
       </div>
       <div class="fee-grid">
         <div class="fee-box on" id="fb-ad" onclick="toggleFee('ad')">
@@ -315,6 +364,8 @@ function calc(){
   const weight=parseFloat(document.getElementById('weight').value);
   const krw100=parseFloat(document.getElementById('rate').value)||930;
   const extra=parseInt(document.getElementById('extraItems').value)||0;
+  const extraShipKRW=parseFloat(document.getElementById('extraShipKRW').value)||0;
+  const extraPackKRW=parseFloat(document.getElementById('extraPackKRW').value)||0;
   const errEl=document.getElementById('err');
   if(!costKRW||!weight){errEl.style.display='block';errEl.textContent='원가와 무게를 입력해주세요.';return;}
   errEl.style.display='none';
@@ -323,7 +374,9 @@ function calc(){
   const shipJ=getShip(weight,method);
   const tplKRW=900+extra*50;
   const tplJ=tplKRW*rate;
-  const totalJ=costJ+shipJ+tplJ;
+  const extraShipJ=extraShipKRW*rate;
+  const extraPackJ=extraPackKRW*rate;
+  const totalJ=costJ+shipJ+tplJ+extraShipJ+extraPackJ;
   const baseR=getBase();
   const fixedRate=baseR+(fees.ad?getR('ad')/100:0)+(fees.megawari?getR('megawari')/100:0)+(fees.megapo?getR('megapo')/100:0);
   const tiers=[
@@ -335,7 +388,7 @@ function calc(){
     {label:'여유',    tag:'com',margin:0.16},
   ];
   const computed=tiers.map(t=>({...t,...calcTier(totalJ,fixedRate,t.margin)}));
-  calcResult={computed,costJ,shipJ,tplJ,tplKRW,totalJ,fixedRate,krw100,baseR};
+  calcResult={computed,costJ,shipJ,tplJ,tplKRW,extraShipJ,extraShipKRW,extraPackJ,extraPackKRW,totalJ,fixedRate,krw100,baseR};
   selIdx=4;genContent=null;
   renderRight();
 }
@@ -346,7 +399,7 @@ const mc=r=>r>8?'mp':r>0?'mp':r===0?'mz':'mn';
 function renderRight(){
   const p=document.getElementById('right');
   if(!calcResult)return;
-  const{computed,costJ,shipJ,tplJ,tplKRW,totalJ,fixedRate,krw100,baseR}=calcResult;
+  const{computed,costJ,shipJ,tplJ,tplKRW,extraShipJ,extraShipKRW,extraPackJ,extraPackKRW,totalJ,fixedRate,krw100,baseR}=calcResult;
   const sel=computed[selIdx];
   const marKRW=sel.marJ!=null?Math.round(sel.marJ*krw100/100):0;
   const shipLabel=method==='sea'?'KSE 해상':method==='air'?'KSE 항공':'KSE 소형';
@@ -375,6 +428,8 @@ function renderRight(){
     <div class="irow"><span style="color:var(--muted)">원가</span><span style="color:var(--muted)">¥${Math.round(costJ).toLocaleString()} <span style="font-size:11px">(${krw100}원/100¥)</span></span></div>
     <div class="irow"><span style="color:var(--muted)">${shipLabel} 배송비</span><span style="color:var(--muted)">¥${shipJ.toLocaleString()}</span></div>
     <div class="irow"><span style="color:var(--muted)">3PL비 (${tplKRW.toLocaleString()}원)</span><span style="color:var(--muted)">¥${Math.round(tplJ).toLocaleString()}</span></div>
+    ${extraShipKRW>0?`<div class="irow"><span style="color:var(--muted)">추가 배송비 (${extraShipKRW.toLocaleString()}원)</span><span style="color:var(--muted)">¥${Math.round(extraShipJ).toLocaleString()}</span></div>`:''}
+    ${extraPackKRW>0?`<div class="irow"><span style="color:var(--muted)">추가 포장비 (${extraPackKRW.toLocaleString()}원)</span><span style="color:var(--muted)">¥${Math.round(extraPackJ).toLocaleString()}</span></div>`:''}
     <div class="irow"><span style="font-weight:500">총원가</span><span style="font-weight:600">¥${Math.round(totalJ).toLocaleString()}</span></div>
     <div class="irow" style="border:none;padding-top:4px;flex-wrap:wrap;gap:4px">
       ${feeBreakdown.map(f=>`<span class="badge">${f}</span>`).join('')}
@@ -422,19 +477,40 @@ async function generate(){
   if(!calcResult)return;
   const pn=document.getElementById('productName').value.trim();
   if(!pn)return;
+  const apiKey=localStorage.getItem('qoo10_api_key');
+  if(!apiKey){
+    alert('먼저 API 키를 설정해주세요.\n헤더의 [API 키 설정] 버튼을 클릭하세요.');
+    document.getElementById('apiPanel').classList.add('on');
+    document.getElementById('apiKey').focus();
+    return;
+  }
   const sel=calcResult.computed[selIdx];
   const btn=document.getElementById('genBtn');
   if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader spin"></i> 생성 중...';}
   try{
     const msg=`상품명:${pn}\n용량:${document.getElementById('capacity').value||'미입력'}\n옵션:${document.getElementById('options').value||'없음'}\n등록가:¥${sel?.fp?.toLocaleString()??'-'}(마진${(sel?.marR??0).toFixed(1)}%)\n특이사항:${document.getElementById('specialNote').value||'없음'}\n이미지:${document.getElementById('imageUrls').value||'미제공'}\nQoo10 Japan용 일본어 상품 정보를 생성해주세요。`;
     const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYS,messages:[{role:'user',content:msg}]})
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,system:SYS,messages:[{role:'user',content:msg}]})
     });
+    if(!res.ok){
+      const errText=await res.text();
+      let errMsg=`HTTP ${res.status}`;
+      try{const errJson=JSON.parse(errText);errMsg=errJson.error?.message||errMsg;}catch(_){}
+      throw new Error(errMsg);
+    }
     const d=await res.json();
     const txt=(d.content||[]).map(x=>x.text||'').join('');
     genContent=JSON.parse(txt.replace(/```json|```/g,'').trim());
-  }catch(e){alert('생성 오류: '+e.message);}
+  }catch(e){
+    alert('생성 오류: '+e.message+'\n\n키가 올바른지, 잔액(크레딧)이 있는지 확인해주세요.');
+  }
   renderRight();
 }
 
@@ -498,6 +574,37 @@ function cp(t,id){
 }
 function ej(s){return(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n');}
 function eh(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function toggleApiPanel(){
+  document.getElementById('apiPanel').classList.toggle('on');
+}
+function saveApiKey(){
+  const k=document.getElementById('apiKey').value.trim();
+  if(!k){alert('API 키를 입력해주세요.');return;}
+  localStorage.setItem('qoo10_api_key',k);
+  updateApiBtn(true);
+  const s=document.getElementById('apiKeyStatus');
+  s.textContent='✓ 저장됨';
+  setTimeout(()=>{s.textContent='';document.getElementById('apiPanel').classList.remove('on');},1200);
+}
+function clearApiKey(){
+  localStorage.removeItem('qoo10_api_key');
+  document.getElementById('apiKey').value='';
+  updateApiBtn(false);
+  const s=document.getElementById('apiKeyStatus');
+  s.textContent='삭제됨';
+  setTimeout(()=>{s.textContent='';},1200);
+}
+function updateApiBtn(isSet){
+  const btn=document.getElementById('apiBtn');
+  const lbl=document.getElementById('apiBtnLabel');
+  if(isSet){btn.classList.add('set');lbl.textContent='API 키 등록됨';}
+  else{btn.classList.remove('set');lbl.textContent='API 키 설정';}
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const saved=localStorage.getItem('qoo10_api_key');
+  if(saved){document.getElementById('apiKey').value=saved;updateApiBtn(true);}
+});
 </script>
 </body>
 </html>
