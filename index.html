@@ -101,6 +101,13 @@ body{font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
   color:var(--gd);font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:space-between}
 .badge{display:inline-block;font-size:11px;padding:2px 7px;border-radius:20px;
   border:.5px solid var(--border);background:var(--bg);color:var(--muted)}
+.kw-badge{display:inline-flex;align-items:center;gap:3px;font-size:11px;padding:3px 9px;border-radius:20px;
+  border:.5px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;
+  transition:all .15s;user-select:none;font-family:inherit}
+.kw-badge:hover{background:#ebe9e2;border-color:var(--border2);color:var(--text)}
+.kw-badge.copied{background:var(--gl);color:var(--gd);border-color:var(--gd)}
+.kw-badge .ti{font-size:10px;opacity:.6}
+.kw-badge:hover .ti{opacity:1}
 .err{font-size:12px;color:#c62828;padding:8px 10px;background:#fdecea;border-radius:var(--rs);margin-top:8px}
 .inote{font-size:11px;color:var(--muted);padding:6px 8px;background:var(--bg);border-radius:var(--rs);line-height:1.6}
 .whint{font-size:10px;color:var(--gd);margin-top:2px;display:none}
@@ -223,6 +230,13 @@ body{font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
           style="width:80px;font-size:12px;padding:1px 4px;border:1px solid var(--border2);border-radius:4px;text-align:right"
           onclick="event.stopPropagation()"/>
         <span style="font-size:11px">원 (KRW · 총원가에 합산)</span>
+      </div>
+      <div style="padding:6px 10px;border-radius:var(--rs);background:var(--bg);font-size:12px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:6px">
+        <i class="ti ti-percentage" style="font-size:11px"></i> 기본 마진율
+        <input id="baseMargin" type="number" value="10" min="0" max="100" step="0.5"
+          style="width:50px;font-size:12px;padding:1px 4px;border:1px solid var(--border2);border-radius:4px;text-align:right"
+          onclick="event.stopPropagation()"/>
+        <span style="font-size:11px">% (다른 단계도 이 값 기준으로 자동 조정)</span>
       </div>
       <div class="fee-grid">
         <div class="fee-box on" id="fb-ad" onclick="toggleFee('ad')">
@@ -415,13 +429,14 @@ function calc(){
   const totalJ=costJ+shipJ+tplJ+extraShipJ+extraPackJ;
   const baseR=getBase();
   const fixedRate=baseR+(fees.ad?getR('ad')/100:0)+(fees.megawari?getR('megawari')/100:0)+(fees.megapo?getR('megapo')/100:0);
+  const baseMargin=(parseFloat(document.getElementById('baseMargin').value)||10)/100;
   const tiers=[
     {label:'손익분기',tag:'brk',margin:0.00},
-    {label:'최저가',  tag:'min',margin:0.03},
-    {label:'공격형',  tag:'agg',margin:0.06},
-    {label:'기본',    tag:'bas',margin:0.10},
-    {label:'추천 ★', tag:'rec',margin:0.13},
-    {label:'여유',    tag:'com',margin:0.16},
+    {label:'최저가',  tag:'min',margin:Math.max(0,baseMargin-0.07)},
+    {label:'공격형',  tag:'agg',margin:Math.max(0,baseMargin-0.04)},
+    {label:'기본',    tag:'bas',margin:baseMargin},
+    {label:'추천 ★', tag:'rec',margin:baseMargin+0.03},
+    {label:'여유',    tag:'com',margin:baseMargin+0.06},
   ];
   const computed=tiers.map(t=>({...t,...calcTier(totalJ,fixedRate,t.margin)}));
   calcResult={computed,costJ,shipJ,tplJ,tplKRW,extraShipJ,extraShipKRW,extraPackJ,extraPackKRW,totalJ,fixedRate,krw100,baseR};
@@ -639,13 +654,13 @@ function renderContent(){
     </div>
     <div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <span style="font-size:11px;color:var(--muted)">검색 키워드 (15개)</span>
+        <span style="font-size:11px;color:var(--muted)">검색 키워드 (15개) <span style="font-size:10px;color:var(--hint)">· 클릭하면 개별 복사</span></span>
         <button onclick="cp('${ej((c.keywords||[]).join(', '))}','kb')" id="kb"
           style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:3px">
           <i class="ti ti-copy" style="font-size:11px"></i> 전체복사</button>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:4px">
-        ${(c.keywords||[]).map(k=>`<span class="badge">${k}</span>`).join('')}
+        ${(c.keywords||[]).map(k=>`<button class="kw-badge" onclick="cpKw(this,'${ej(k)}')" title="클릭해서 복사"><i class="ti ti-copy"></i>${eh(k)}</button>`).join('')}
       </div>
     </div>
     <div>
@@ -675,6 +690,15 @@ function cp(t,id){
     const o=b.innerHTML;
     b.innerHTML='<i class="ti ti-check" style="font-size:11px;color:var(--green)"></i> 복사됨';
     setTimeout(()=>{b.innerHTML=o;},1500);
+  });
+}
+function cpKw(el,text){
+  navigator.clipboard.writeText(text).then(()=>{
+    if(!el)return;
+    const o=el.innerHTML;
+    el.classList.add('copied');
+    el.innerHTML=`<i class="ti ti-check"></i> ${text}`;
+    setTimeout(()=>{el.classList.remove('copied');el.innerHTML=o;},1200);
   });
 }
 function ej(s){return(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n');}
