@@ -112,6 +112,31 @@ body{font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
 .inote{font-size:11px;color:var(--muted);padding:6px 8px;background:var(--bg);border-radius:var(--rs);line-height:1.6}
 .whint{font-size:10px;color:var(--gd);margin-top:2px;display:none}
 
+.mode-tabs{display:flex;gap:0;background:var(--bg);border:.5px solid var(--border);border-radius:var(--rs);padding:2px;margin-bottom:12px}
+.mode-tab{flex:1;padding:6px 10px;font-size:12px;font-weight:500;background:none;border:none;border-radius:calc(var(--rs) - 2px);color:var(--muted);cursor:pointer;transition:all .15s}
+.mode-tab.on{background:#fff;color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+
+.opt-row{display:grid;grid-template-columns:24px 1fr 100px 70px 24px;gap:6px;align-items:center;padding:4px 0}
+.opt-row input{font-size:12px;padding:5px 7px;border:1px solid var(--border2);border-radius:4px;background:#fff;font-family:inherit;width:100%;box-sizing:border-box}
+.opt-row .opt-num{font-size:11px;color:var(--muted);text-align:center;font-weight:500}
+.opt-row .opt-del{font-size:14px;color:var(--muted);background:none;border:none;cursor:pointer;padding:2px;border-radius:4px}
+.opt-row .opt-del:hover{color:#c62828;background:#fdecea}
+.opt-add{font-size:11px;padding:4px 10px;background:var(--bg);border:.5px dashed var(--border2);border-radius:var(--rs);color:var(--muted);cursor:pointer;width:100%;margin-top:4px}
+.opt-add:hover{background:#ebe9e2;color:var(--text)}
+.pick-row{display:flex;gap:6px;align-items:center;margin:8px 0;font-size:12px;color:var(--muted)}
+.pick-btn{padding:4px 12px;font-size:12px;background:var(--bg);border:.5px solid var(--border);border-radius:var(--rs);cursor:pointer;color:var(--muted)}
+.pick-btn.on{background:var(--gdp);color:#fff;border-color:var(--gdp)}
+
+.combo-table{width:100%;font-size:12px;border-collapse:collapse;margin-top:8px}
+.combo-table th{text-align:left;padding:6px 8px;background:var(--bg);color:var(--muted);font-weight:500;font-size:11px;border-bottom:.5px solid var(--border)}
+.combo-table td{padding:7px 8px;border-bottom:.5px solid var(--border);vertical-align:middle}
+.combo-table tr.base td{background:#fff8e1}
+.combo-table tr.warn td{background:#fdecea}
+.combo-table .surcharge-pos{color:#c62828;font-weight:500}
+.combo-table .surcharge-neg{color:var(--gd);font-weight:500}
+.combo-table .surcharge-zero{color:var(--muted)}
+.combo-table input[type="radio"]{cursor:pointer}
+
 .empty{background:var(--bg);border:.5px solid var(--border);border-radius:var(--r);
   padding:2.5rem 1.5rem;text-align:center}
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
@@ -171,7 +196,7 @@ body{font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
       <div class="slabel">상품 정보</div>
       <div class="field"><label>상품명 (한국어)</label><input id="productName" placeholder=""/></div>
       <div class="field"><label>브랜드 (한국어)</label><input id="brandName" placeholder=""/></div>
-      <div class="g2">
+      <div class="g2" id="singleWeightWrap">
         <div class="field" style="margin-bottom:0">
           <label>용량</label>
           <input id="capacity" placeholder="" oninput="onCapInput(this.value)"/>
@@ -193,14 +218,32 @@ body{font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
 
     <div class="card">
       <div class="slabel">가격 조건</div>
+      <div class="mode-tabs">
+        <button class="mode-tab on" data-mode="single" onclick="setProductMode('single')">단일 상품</button>
+        <button class="mode-tab" data-mode="set" onclick="setProductMode('set')">옵션 세트</button>
+      </div>
       <div class="stabs">
         <div class="stab on" data-m="sea" onclick="selMethod('sea')">해상</div>
         <div class="stab" data-m="air" onclick="selMethod('air')">항공</div>
         <div class="stab" data-m="light" onclick="selMethod('light')">소형</div>
       </div>
-      <div class="g2" style="margin-bottom:8px">
-        <div class="field" style="margin-bottom:0"><label>원가 (원)</label><input type="number" id="costKRW" placeholder=""/></div>
-        <div class="field" style="margin-bottom:0"><label>환율 (100엔 = ? 원)</label><input type="number" id="rate" value="930" placeholder="930"/></div>
+      <div id="singleInputs">
+        <div class="g2" style="margin-bottom:8px">
+          <div class="field" style="margin-bottom:0"><label>원가 (원)</label><input type="number" id="costKRW" placeholder=""/></div>
+          <div class="field" style="margin-bottom:0"><label>환율 (100엔 = ? 원)</label><input type="number" id="rate" value="930" placeholder="930"/></div>
+        </div>
+      </div>
+      <div id="setInputs" style="display:none">
+        <div class="field" style="margin-bottom:8px"><label>환율 (100엔 = ? 원)</label><input type="number" id="rate2" value="930" placeholder="930" oninput="syncRate(this)"/></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">옵션 아이템 <span style="font-size:10px">(이름 · 원가 · 무게g)</span></div>
+        <div id="optItems"></div>
+        <button class="opt-add" onclick="addOptItem()"><i class="ti ti-plus" style="font-size:11px"></i> 아이템 추가</button>
+        <div class="pick-row">
+          <span>세트 구성 (고객 선택 개수):</span>
+          <button class="pick-btn" data-pick="1" onclick="setPickCount(1)">1개</button>
+          <button class="pick-btn on" data-pick="2" onclick="setPickCount(2)">2개</button>
+          <button class="pick-btn" data-pick="3" onclick="setPickCount(3)">3개</button>
+        </div>
       </div>
       <div class="g2" style="margin-bottom:12px">
         <div class="field" style="margin-bottom:0"><label>합포장 추가 개수</label><input type="number" min="0" id="extraItems" value="0" placeholder="0"/></div>
@@ -318,6 +361,59 @@ function getCouponRate(price){
 
 const fees={ad:true,coupon:true,megawari:false,megapo:false};
 let method='sea',calcResult=null,selIdx=4,genContent=null;
+let productMode='single';
+let optItems=[
+  {name:'',krw:'',weightG:''},
+  {name:'',krw:'',weightG:''},
+  {name:'',krw:'',weightG:''},
+  {name:'',krw:'',weightG:''},
+  {name:'',krw:'',weightG:''}
+];
+let baseOptIdx=0;
+let pickCount=2;
+
+function syncRate(el){const r=document.getElementById('rate');if(r)r.value=el.value;}
+function setProductMode(m){
+  productMode=m;
+  document.querySelectorAll('.mode-tab').forEach(t=>t.classList.toggle('on',t.dataset.mode===m));
+  document.getElementById('singleInputs').style.display=m==='single'?'block':'none';
+  document.getElementById('setInputs').style.display=m==='set'?'block':'none';
+  document.getElementById('singleWeightWrap').style.display=m==='single'?'grid':'none';
+  if(m==='set')renderOptItems();
+  calcResult=null;genContent=null;
+  document.getElementById('right').innerHTML='';
+}
+function setPickCount(n){
+  pickCount=n;
+  document.querySelectorAll('.pick-btn').forEach(b=>b.classList.toggle('on',parseInt(b.dataset.pick)===n));
+  if(productMode==='set'&&calcResult)calc();
+}
+function addOptItem(){
+  optItems.push({name:'',krw:'',weightG:''});
+  renderOptItems();
+}
+function delOptItem(i){
+  if(optItems.length<=2){alert('최소 2개의 아이템이 필요합니다.');return;}
+  optItems.splice(i,1);
+  if(baseOptIdx>=optItems.length)baseOptIdx=0;
+  renderOptItems();
+}
+function updateOptItem(i,field,val){
+  optItems[i][field]=val;
+}
+function renderOptItems(){
+  const c=document.getElementById('optItems');
+  if(!c)return;
+  c.innerHTML=optItems.map((it,i)=>`
+    <div class="opt-row">
+      <div class="opt-num">${i+1}</div>
+      <input type="text" placeholder="아이템 이름" value="${(it.name||'').replace(/"/g,'&quot;')}" oninput="updateOptItem(${i},'name',this.value)"/>
+      <input type="number" placeholder="원가(원)" value="${it.krw}" oninput="updateOptItem(${i},'krw',this.value)"/>
+      <input type="number" step="1" placeholder="무게g" value="${it.weightG}" oninput="updateOptItem(${i},'weightG',this.value)"/>
+      <button class="opt-del" onclick="delOptItem(${i})" title="삭제"><i class="ti ti-x"></i></button>
+    </div>
+  `).join('');
+}
 
 function getR(id){return parseFloat(document.getElementById('r-'+id).value)||0;}
 function getBase(){return(parseFloat(document.getElementById('baseRate').value)||13)/100;}
@@ -387,6 +483,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     document.getElementById('whint').style.display='none';
   });
   renderImageInputs();
+  renderOptItems();
 });
 
 function calcTier(totalCostJPY,fixedRate,margin){
@@ -410,6 +507,7 @@ function calcTier(totalCostJPY,fixedRate,margin){
 }
 
 function calc(){
+  if(productMode==='set'){calcSet();return;}
   const costKRW=parseFloat(document.getElementById('costKRW').value);
   const weight=parseFloat(document.getElementById('weight').value);
   const krw100=parseFloat(document.getElementById('rate').value)||930;
@@ -439,8 +537,71 @@ function calc(){
     {label:'여유',    tag:'com',margin:baseMargin+0.06},
   ];
   const computed=tiers.map(t=>({...t,...calcTier(totalJ,fixedRate,t.margin)}));
-  calcResult={computed,costJ,shipJ,tplJ,tplKRW,extraShipJ,extraShipKRW,extraPackJ,extraPackKRW,totalJ,fixedRate,krw100,baseR};
+  calcResult={mode:'single',computed,costJ,shipJ,tplJ,tplKRW,extraShipJ,extraShipKRW,extraPackJ,extraPackKRW,totalJ,fixedRate,krw100,baseR};
   selIdx=4;genContent=null;
+  renderRight();
+}
+
+function calcSet(){
+  const krw100=parseFloat(document.getElementById('rate2').value)||parseFloat(document.getElementById('rate').value)||930;
+  const extra=parseInt(document.getElementById('extraItems').value)||0;
+  const extraShipKRW=parseFloat(document.getElementById('extraShipKRW').value)||0;
+  const extraPackKRW=parseFloat(document.getElementById('extraPackKRW').value)||0;
+  const errEl=document.getElementById('err');
+  const valid=optItems.map((it,i)=>({...it,idx:i})).filter(it=>it.name&&parseFloat(it.krw)>0&&parseFloat(it.weightG)>0);
+  if(valid.length<2){
+    errEl.style.display='block';
+    errEl.textContent='유효한 아이템(이름·원가·무게 모두 입력)이 최소 2개 필요합니다.';
+    return;
+  }
+  errEl.style.display='none';
+  const rate=100/krw100;
+  const baseR=getBase();
+  const fixedRate=baseR+(fees.ad?getR('ad')/100:0)+(fees.megawari?getR('megawari')/100:0)+(fees.megapo?getR('megapo')/100:0);
+  const baseMargin=(parseFloat(document.getElementById('baseMargin').value)||10)/100;
+  const tierDefs=[
+    {label:'손익분기',tag:'brk',margin:0.00},
+    {label:'최저가',  tag:'min',margin:Math.max(0,baseMargin-0.07)},
+    {label:'공격형',  tag:'agg',margin:Math.max(0,baseMargin-0.04)},
+    {label:'기본',    tag:'bas',margin:baseMargin},
+    {label:'추천 ★', tag:'rec',margin:baseMargin+0.03},
+    {label:'여유',    tag:'com',margin:baseMargin+0.06},
+  ];
+  if(baseOptIdx>=valid.length)baseOptIdx=0;
+  const base=valid[baseOptIdx];
+  const baseKrw=parseFloat(base.krw);
+  const baseWeightG=parseFloat(base.weightG);
+  // Base listing = pickCount × base option
+  const setCostKRW=baseKrw*pickCount;
+  const setWeightG=baseWeightG*pickCount;
+  const setCostJ=setCostKRW*rate;
+  const setShipJ=getShip(setWeightG/1000,method);
+  const tplKRW=900+extra*pickCount*50; // pickCount items = pickCount-1 extras for 합포장
+  const tplJ=tplKRW*rate;
+  const extraShipJ=extraShipKRW*rate;
+  const extraPackJ=extraPackKRW*rate;
+  const setTotalJ=setCostJ+setShipJ+tplJ+extraShipJ+extraPackJ;
+  // Per-tier: base listing price + per-option surcharge factor
+  const tierResults=tierDefs.map(t=>{
+    const c=calcTier(setTotalJ,fixedRate,t.margin);
+    if(!c)return{...t,fp:0,marJ:0,marR:0,couponRate:0,denom:0};
+    const denom=1-fixedRate-(c.couponRate||0)-t.margin;
+    return{...t,...c,denom};
+  });
+  // Per-option: name + krw + weightG + surchargesPerTier[]
+  const items=valid.map(it=>{
+    const krw=parseFloat(it.krw);
+    const weightG=parseFloat(it.weightG);
+    const diffKrw=krw-baseKrw;
+    const surchargesPerTier=tierResults.map(t=>{
+      if(!t.denom||t.denom<=0)return 0;
+      return Math.round(diffKrw*rate/t.denom);
+    });
+    return{name:it.name,krw,weightG,surchargesPerTier,weightDiff:weightG-baseWeightG};
+  });
+  calcResult={mode:'set',items,tierResults,baseOptIdx,pickCount,baseR,baseMargin,fixedRate,krw100,tplKRW,setCostKRW,setWeightG,extraShipKRW,extraPackKRW,setCostJ,setShipJ,tplJ,setTotalJ};
+  if(selIdx>5||selIdx<0)selIdx=4;
+  genContent=null;
   renderRight();
 }
 
@@ -450,6 +611,7 @@ const mc=r=>r>8?'mp':r>0?'mp':r===0?'mz':'mn';
 function renderRight(){
   const p=document.getElementById('right');
   if(!calcResult)return;
+  if(calcResult.mode==='set'){renderRightSet();return;}
   const{computed,costJ,shipJ,tplJ,tplKRW,extraShipJ,extraShipKRW,extraPackJ,extraPackKRW,totalJ,fixedRate,krw100,baseR}=calcResult;
   const sel=computed[selIdx];
   const marKRW=sel.marJ!=null?Math.round(sel.marJ*krw100/100):0;
@@ -517,6 +679,107 @@ function renderRight(){
 }
 
 function selTier(i){selIdx=i;renderRight();}
+function selBaseCombo(i){baseOptIdx=i;if(calcResult)calcResult.baseOptIdx=i;calc();}
+
+function renderRightSet(){
+  const p=document.getElementById('right');
+  const{items,tierResults,baseOptIdx:bi,pickCount,krw100,setCostJ,setShipJ,tplJ,setTotalJ,tplKRW,setCostKRW,setWeightG,extraShipKRW,extraPackKRW,baseR,baseMargin}=calcResult;
+  const tier=tierResults[selIdx]||tierResults[3];
+  const baseFp=Math.round(tier.fp||0);
+  // option table rows
+  const rows=items.map((c,i)=>{
+    const surcharge=c.surchargesPerTier[selIdx]||0;
+    const surchargePct=baseFp?(surcharge/baseFp):0;
+    // surcharge applies pickCount times if customer picks pickCount of this option vs pickCount of base
+    const maxPossiblePct=Math.abs(surcharge*pickCount/baseFp);
+    const overLimit=maxPossiblePct>0.50;
+    const isBase=i===bi;
+    const surchargeClass=surcharge>0?'surcharge-pos':surcharge<0?'surcharge-neg':'surcharge-zero';
+    const surchargeTxt=isBase?'기준 (+0)':`${surcharge>=0?'+':''}¥${surcharge.toLocaleString()}`;
+    const weightWarn=Math.abs(c.weightDiff)>20&&!isBase;
+    return `<tr class="${isBase?'base':''}${overLimit?' warn':''}">
+      <td><input type="radio" name="basecombo" ${isBase?'checked':''} onclick="selBaseCombo(${i})"/></td>
+      <td style="font-weight:${isBase?'600':'400'}">${c.name}</td>
+      <td style="text-align:right;color:var(--muted);font-size:11px">${c.krw.toLocaleString()}원<br><span style="font-size:10px">${c.weightG}g${weightWarn?` <span style="color:#c62828">(${c.weightDiff>0?'+':''}${c.weightDiff}g)</span>`:''}</span></td>
+      <td style="text-align:right" class="${surchargeClass}">${surchargeTxt}${isBase?'':`<br><span style="font-size:10px">(아이템당)</span>`}${overLimit?'<br><span style="font-size:10px;color:#c62828">⚠ 최대 ±50% 초과 가능</span>':''}</td>
+    </tr>`;
+  }).join('');
+  // tier table rows
+  const tierRows=tierResults.map((t,i)=>{
+    if(!t.fp)return '';
+    const s=i===selIdx;
+    const marKRW=t.marJ?Math.round(t.marJ*krw100/100):0;
+    return `<tr class="tier-row${s?' tr-sel':''}" onclick="selTier(${i})">
+      <td><span class="tbadge ${BC[t.tag]}">${t.label}</span>${s?'<span style="font-size:10px;color:var(--accent);margin-left:4px"><i class="ti ti-check"></i></span>':''}</td>
+      <td><span class="pval">¥${Math.round(t.fp).toLocaleString()}</span></td>
+      <td><span class="mval ${mc(t.marR)}">${(t.marR??0).toFixed(1)}%</span></td>
+      <td style="font-size:12px;color:var(--muted);text-align:right">¥${Math.round(t.marJ||0).toLocaleString()}<br><span style="font-size:10px">≈${marKRW.toLocaleString()}원</span></td>
+    </tr>`;
+  }).join('');
+  const feeBreakdown=[`기본 ${(baseR*100).toFixed(0)}%`];
+  if(fees.ad)feeBreakdown.push(`광고 ${getR('ad')}%`);
+  if(fees.megawari)feeBreakdown.push(`메가와리 ${getR('megawari')}%`);
+  if(fees.megapo)feeBreakdown.push(`메가포 ${getR('megapo')}%`);
+  if(fees.coupon&&tier.couponRate>0)feeBreakdown.push(`쿠폰 ${(tier.couponRate*100).toFixed(0)}% 역산`);
+  const baseName=items[bi].name||`옵션 ${bi+1}`;
+  // simulated price for picking max-priced option × pickCount
+  const sortedSur=[...items.map(c=>c.surchargesPerTier[selIdx]||0)].sort((a,b)=>b-a);
+  const maxOptSur=sortedSur[0]||0;
+  const minOptSur=sortedSur[sortedSur.length-1]||0;
+  const maxComboPrice=baseFp+maxOptSur*pickCount;
+  const minComboPrice=baseFp+minOptSur*pickCount;
+
+  p.innerHTML=`
+  <div class="card">
+    <div class="slabel">옵션 세트 · ${pickCount}개 선택형</div>
+    <div class="irow" style="margin-bottom:2px"><span style="color:var(--muted)">기준 옵션</span><span style="font-weight:500">${baseName} ×${pickCount}</span></div>
+    <div class="irow" style="margin-bottom:2px"><span style="color:var(--muted)">기준 합산 원가</span><span style="font-size:11px;color:var(--muted)">${setCostKRW.toLocaleString()}원 (${setWeightG}g)</span></div>
+    <div class="irow" style="margin-bottom:2px"><span style="color:var(--muted)">기준 비용</span><span style="font-size:11px;color:var(--muted)">원가 ¥${Math.round(setCostJ).toLocaleString()} + 배송 ¥${setShipJ.toLocaleString()} + 3PL ¥${Math.round(tplJ).toLocaleString()}${extraShipKRW>0?` + 배송 ${extraShipKRW.toLocaleString()}원`:''}${extraPackKRW>0?` + 포장 ${extraPackKRW.toLocaleString()}원`:''} = ¥${Math.round(setTotalJ).toLocaleString()}</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:3px;margin:8px 0">
+      ${feeBreakdown.map(f=>`<span class="badge">${f}</span>`).join('')}
+      <span class="badge">기본 마진 ${(baseMargin*100).toFixed(1)}%</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="slabel">마진 시뮬레이션 (${pickCount}개 세트 기준)</div>
+    <table class="tier-table">
+      <thead><tr><th>단계</th><th>등록가</th><th>마진율</th><th style="text-align:right">¥마진 (≈원)</th></tr></thead>
+      <tbody>${tierRows}</tbody>
+    </table>
+    <div class="inote" style="margin-top:8px">
+      <i class="ti ti-info-circle" style="margin-right:4px;font-size:12px"></i>
+      "등록가"는 고객이 기준 옵션을 ${pickCount}개 골랐을 때의 금액. 다른 옵션을 고르면 아래 표의 추가금만큼 ±됩니다.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="slabel">옵션별 추가금 <span style="font-size:11px;color:var(--muted);font-weight:normal">· ${tier.label} 단계 (마진 ${(tier.marR||0).toFixed(1)}%)</span></div>
+    <div style="overflow-x:auto">
+    <table class="combo-table">
+      <thead>
+        <tr>
+          <th style="width:30px">기준</th>
+          <th>옵션명</th>
+          <th style="text-align:right">원가/무게</th>
+          <th style="text-align:right">옵션 추가금</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+    </div>
+    <div class="inote" style="margin-top:10px">
+      <i class="ti ti-info-circle" style="margin-right:4px;font-size:12px"></i>
+      추가금은 <b>아이템당 ±엔</b>. ${pickCount}개 모두 같은 옵션을 고르면 추가금 × ${pickCount} 적용.<br>
+      예상 가격대: <b>¥${minComboPrice.toLocaleString()}</b> (최저) ~ <b>¥${maxComboPrice.toLocaleString()}</b> (최고)
+    </div>
+    <div class="slabel" style="margin-bottom:8px;margin-top:16px">일본어 콘텐츠 생성</div>
+    ${!document.getElementById('productName').value.trim()
+      ?'<p style="font-size:13px;color:var(--muted);margin:0">상품명을 먼저 입력해주세요.</p>'
+      :`<button class="btn-gen" id="genBtn" onclick="generate()"><i class="ti ti-sparkles"></i> 일본어 콘텐츠 생성 ↗</button>`}
+  </div>
+  ${genContent?renderContent():''}`;
+}
 
 const SYS=`あなたはQoo10 Japanに出品する韓国コスメの商品登録の専門家です。薬機法・景品表示法を厳守してください。
 【禁止】治る、改善、再生、美白、シワ改善、抗酸化、強力な、実感、最高、No.1、必ず、絶対、医学的、即効
@@ -593,15 +856,28 @@ async function generate(){
     document.getElementById('apiKey').focus();
     return;
   }
-  const sel=calcResult.computed[selIdx];
   const btn=document.getElementById('genBtn');
   if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader spin"></i> 생성 중...';}
   try{
     const brandName=document.getElementById('brandName').value.trim()||'未入力';
-    const weightKg=parseFloat(document.getElementById('weight').value)||0;
-    const weightG=Math.round(weightKg*1000);
     const imageUrlsStr=getImageUrls();
-    const msg=`商品名（韓国語）:${pn}\nブランド（韓国語）:${brandName}\n容量:${document.getElementById('capacity').value||'未入力'}\n重量（梱包込・グラム）:${weightG}g\nオプション:${document.getElementById('options').value||'なし'}\n登録価格:¥${sel?.fp?.toLocaleString()??'-'}（マージン${(sel?.marR??0).toFixed(1)}%）\n特記事項:${document.getElementById('specialNote').value||'なし'}\n画像URL（オプション別）:\n${imageUrlsStr||'未提供'}\n\nQoo10 Japan用の日本語商品情報を生成してください。html_descriptionは指定された①〜⑥の構成（冒頭フッキング→画像→サブフック→POINT 3〜4個→HOW TO USE→商品情報テーブル）を必ず守り、最外側を max-width:600px のラップdivで包んでください。複数の画像URLが提供された場合は、②商品画像エリアでオプション名のキャプション付きで縦並びに配置してください。商品情報テーブルの「重量（梱包込）」には「約${weightG}g」を入れてください。`;
+    let msg;
+    if(calcResult.mode==='set'){
+      const{items,baseOptIdx:bi,tierResults,pickCount}=calcResult;
+      const tier=tierResults[selIdx];
+      const baseItem=items[bi];
+      const baseFp=Math.round(tier.fp||0);
+      const itemsTxt=items.map((c,i)=>{
+        const sur=c.surchargesPerTier[selIdx]||0;
+        return `${i===bi?'★기준 ':''}${c.name}: 추가금 ${sur>=0?'+':''}¥${sur.toLocaleString()}/個 (원가 ${c.krw.toLocaleString()}원, ${c.weightG}g)`;
+      }).join('\n');
+      msg=`【オプション選択型セット商品】\n商品名（韓国語）:${pn}\nブランド（韓国語）:${brandName}\n販売形式: ${pickCount}個セレクト型（顧客が${items.length}種類の中から${pickCount}個を選んで購入）\n価格戦略: ${tier.label}（マージン${(tier.margin*100).toFixed(1)}%）\n基準オプション: ${baseItem.name} ×${pickCount}\n基準セット価格: ¥${baseFp.toLocaleString()}\n基準合計重量: ${baseItem.weightG*pickCount}g\n\n【全オプションと追加金（アイテム1個あたり）】\n${itemsTxt}\n\n特記事項:${document.getElementById('specialNote').value||'なし'}\n画像URL（オプション別）:\n${imageUrlsStr||'未提供'}\n\nQoo10 Japan用の日本語商品情報を生成してください。html_descriptionは指定された①〜⑥の構成を守り、最外側を max-width:600px のラップdivで包んでください。\n重要: ①フッキングは「${items.length}種から${pickCount}個自由に選べるセット」「気分や肌悩みに合わせて」など、セレクト型の魅力を訴求してください。④POINTセクションでは各アイテムの特徴を簡潔に紹介する POINT を含めてください（例: POINT 1=TXA・しみ印象ケア、POINT 2=PDRN・うるおいケア等）。⑥商品情報テーブルの「商品名」はブランド名+ライン名、「商品タイプ」は適切に推測、「重量（梱包込）」には「約${baseItem.weightG*pickCount}g（基準セット）」と入れ、新たに「セット構成」行を追加して「${pickCount}個セレクト（全${items.length}種より）」と記載してください。\n複数の画像URLが提供された場合は、②商品画像エリアでアイテム名のキャプション付きで縦並びに配置してください。`;
+    }else{
+      const sel=calcResult.computed[selIdx];
+      const weightKg=parseFloat(document.getElementById('weight').value)||0;
+      const weightG=Math.round(weightKg*1000);
+      msg=`商品名（韓国語）:${pn}\nブランド（韓国語）:${brandName}\n容量:${document.getElementById('capacity').value||'未入力'}\n重量（梱包込・グラム）:${weightG}g\nオプション:${document.getElementById('options').value||'なし'}\n登録価格:¥${sel?.fp?.toLocaleString()??'-'}（マージン${(sel?.marR??0).toFixed(1)}%）\n特記事項:${document.getElementById('specialNote').value||'なし'}\n画像URL（オプション別）:\n${imageUrlsStr||'未提供'}\n\nQoo10 Japan用の日本語商品情報を生成してください。html_descriptionは指定された①〜⑥の構成（冒頭フッキング→画像→サブフック→POINT 3〜4個→HOW TO USE→商品情報テーブル）を必ず守り、最外側を max-width:600px のラップdivで包んでください。複数の画像URLが提供された場合は、②商品画像エリアでオプション名のキャプション付きで縦並びに配置してください。商品情報テーブルの「重量（梱包込）」には「約${weightG}g」を入れてください。`;
+    }
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{
