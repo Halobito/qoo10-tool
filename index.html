@@ -244,6 +244,18 @@ body{font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
           <button class="pick-btn on" data-pick="2" onclick="setPickCount(2)">2개</button>
           <button class="pick-btn" data-pick="3" onclick="setPickCount(3)">3개</button>
         </div>
+        <div class="pick-row" style="margin-top:4px">
+          <span>가격 산정:</span>
+          <button class="pick-btn on set-mode-btn" data-smode="markup" onclick="setSetPricingMode('markup')" title="세트 총원가 기준 마크업 적용">마크업 유지</button>
+          <button class="pick-btn set-mode-btn" data-smode="unit" onclick="setSetPricingMode('unit')" title="단품가 × 개수 − 할인%">단품가 × 개수</button>
+        </div>
+        <div id="setDiscountWrap" class="pick-row" style="display:none;margin-top:4px">
+          <span>세트 할인:</span>
+          <input type="number" id="setDiscountInput" value="0" min="0" max="50" step="1"
+            style="width:60px;font-size:12px;padding:5px 8px;border:1px solid var(--border2);border-radius:4px;text-align:right;background:#fff;font-family:inherit"
+            oninput="updateSetDiscount(this.value)"/>
+          <span style="font-size:11px">% (단품가×개수에서 차감 · 0=할인 없음)</span>
+        </div>
       </div>
       <div class="g2" style="margin-bottom:12px">
         <div class="field" style="margin-bottom:0"><label>합포장 추가 개수</label><input type="number" min="0" id="extraItems" value="0" placeholder="0"/></div>
@@ -371,6 +383,8 @@ let optItems=[
 ];
 let baseOptIdx=0;
 let pickCount=2;
+let setPricingMode='markup'; // 'markup' or 'unit'
+let setDiscount=0;
 
 function syncRate(el){const r=document.getElementById('rate');if(r)r.value=el.value;}
 function setProductMode(m){
@@ -386,6 +400,17 @@ function setProductMode(m){
 function setPickCount(n){
   pickCount=n;
   document.querySelectorAll('.pick-btn').forEach(b=>b.classList.toggle('on',parseInt(b.dataset.pick)===n));
+  if(productMode==='set'&&calcResult)calc();
+}
+function setSetPricingMode(m){
+  setPricingMode=m;
+  document.querySelectorAll('.set-mode-btn').forEach(b=>b.classList.toggle('on',b.dataset.smode===m));
+  const dw=document.getElementById('setDiscountWrap');
+  if(dw)dw.style.display=m==='unit'?'flex':'none';
+  if(productMode==='set'&&calcResult)calc();
+}
+function updateSetDiscount(v){
+  setDiscount=Math.max(0,Math.min(50,parseFloat(v)||0));
   if(productMode==='set'&&calcResult)calc();
 }
 function addOptItem(){
@@ -575,35 +600,71 @@ function calcSet(){
   const base=valid[baseOptIdx];
   const baseKrw=parseFloat(base.krw);
   const baseWeightG=parseFloat(base.weightG);
-  // Base listing = pickCount × base option
+  const extraShipJ=extraShipKRW*rate;
+  const extraPackJ=extraPackKRW*rate;
+
+  // === Single-item costs/prices per option (for unit mode) ===
+  const singleTplKRW=900+extra*50;
+  const singleTplJ=singleTplKRW*rate;
+  const singleResults=valid.map(it=>{
+    const krw=parseFloat(it.krw);
+    const weightG=parseFloat(it.weightG);
+    const itemTotalJ=krw*rate+getShip(weightG/1000,method)+singleTplJ+extraShipJ+extraPackJ;
+    const tierPrices=tierDefs.map(t=>calcTier(itemTotalJ,fixedRate,t.margin)||{fp:0});
+    return{krw,weightG,itemTotalJ,tierPrices};
+  });
+
+  // === Set (pickCount × base) cost ===
   const setCostKRW=baseKrw*pickCount;
   const setWeightG=baseWeightG*pickCount;
   const setCostJ=setCostKRW*rate;
   const setShipJ=getShip(setWeightG/1000,method);
-  const tplKRW=900+extra*pickCount*50; // pickCount items = pickCount-1 extras for 합포장
+  const tplKRW=900+(pickCount-1+extra)*50; // 1개 base + 추가품목들
   const tplJ=tplKRW*rate;
-  const extraShipJ=extraShipKRW*rate;
-  const extraPackJ=extraPackKRW*rate;
   const setTotalJ=setCostJ+setShipJ+tplJ+extraShipJ+extraPackJ;
-  // Per-tier: base listing price + per-option surcharge factor
-  const tierResults=tierDefs.map(t=>{
-    const c=calcTier(setTotalJ,fixedRate,t.margin);
-    if(!c)return{...t,fp:0,marJ:0,marR:0,couponRate:0,denom:0};
-    const denom=1-fixedRate-(c.couponRate||0)-t.margin;
-    return{...t,...c,denom};
+
+  // === Per-tier set price ===
+  const tierResults=tierDefs.map((t,ti)=>{
+    if(setPricingMode==='unit'){
+      const singleBaseFp=singleResults[baseOptIdx].tierPrices[ti].fp||0;
+      const targetPrice=singleBaseFp*pickCount*(1-setDiscount/100);
+      if(targetPrice<=0)return{...t,fp:0,marJ:0,marR:0,netMarR:0,couponRate:0,denom:0,singleFp:singleBaseFp};
+      const fp=Math.ceil(targetPrice/10)*10;
+      const couponRate=fees.coupon?getCouponRate(fp):0;
+      const tfr=fixedRate+couponRate;
+      const feeJ=fp*tfr;
+      const marJ=fp-setTotalJ-feeJ;
+      const marR=setTotalJ>0?(marJ/setTotalJ)*100:0;
+      const netMarR=fp>0?(marJ/fp)*100:0;
+      const denom=1-fixedRate-couponRate;
+      return{...t,fp,marJ,marR,netMarR,couponRate,tfr,denom,singleFp:singleBaseFp};
+    }else{
+      const c=calcTier(setTotalJ,fixedRate,t.margin);
+      if(!c)return{...t,fp:0,marJ:0,marR:0,netMarR:0,couponRate:0,denom:0,singleFp:0};
+      const denom=1-fixedRate-(c.couponRate||0)-t.margin;
+      return{...t,...c,denom,singleFp:singleResults[baseOptIdx].tierPrices[ti].fp||0};
+    }
   });
-  // Per-option: name + krw + weightG + surchargesPerTier[]
-  const items=valid.map(it=>{
+
+  // === Per-item surcharge per tier ===
+  const items=valid.map((it,idx)=>{
     const krw=parseFloat(it.krw);
     const weightG=parseFloat(it.weightG);
     const diffKrw=krw-baseKrw;
-    const surchargesPerTier=tierResults.map(t=>{
-      if(!t.denom||t.denom<=0)return 0;
-      return Math.round(diffKrw*rate/t.denom);
+    const surchargesPerTier=tierDefs.map((t,ti)=>{
+      if(setPricingMode==='unit'){
+        const baseSingle=singleResults[baseOptIdx].tierPrices[ti].fp||0;
+        const itemSingle=singleResults[idx].tierPrices[ti].fp||0;
+        return Math.round((itemSingle-baseSingle)*(1-setDiscount/100));
+      }else{
+        const denom=tierResults[ti].denom;
+        if(!denom||denom<=0)return 0;
+        return Math.round(diffKrw*rate/denom);
+      }
     });
     return{name:it.name,krw,weightG,surchargesPerTier,weightDiff:weightG-baseWeightG};
   });
-  calcResult={mode:'set',items,tierResults,baseOptIdx,pickCount,baseR,baseMargin,fixedRate,krw100,tplKRW,setCostKRW,setWeightG,extraShipKRW,extraPackKRW,setCostJ,setShipJ,tplJ,setTotalJ};
+  calcResult={mode:'set',items,tierResults,baseOptIdx,pickCount,setPricingMode,setDiscount,baseR,baseMargin,fixedRate,krw100,tplKRW,setCostKRW,setWeightG,extraShipKRW,extraPackKRW,setCostJ,setShipJ,tplJ,setTotalJ,singleBaseTotalJ:singleResults[baseOptIdx].itemTotalJ};
   if(selIdx>5||selIdx<0)selIdx=4;
   genContent=null;
   renderRight();
@@ -689,9 +750,10 @@ function selBaseCombo(i){baseOptIdx=i;if(calcResult)calcResult.baseOptIdx=i;calc
 
 function renderRightSet(){
   const p=document.getElementById('right');
-  const{items,tierResults,baseOptIdx:bi,pickCount,krw100,setCostJ,setShipJ,tplJ,setTotalJ,tplKRW,setCostKRW,setWeightG,extraShipKRW,extraPackKRW,baseR,baseMargin}=calcResult;
+  const{items,tierResults,baseOptIdx:bi,pickCount,setPricingMode:spm,setDiscount:sd,krw100,setCostJ,setShipJ,tplJ,setTotalJ,tplKRW,setCostKRW,setWeightG,extraShipKRW,extraPackKRW,baseR,baseMargin,singleBaseTotalJ}=calcResult;
   const tier=tierResults[selIdx]||tierResults[3];
   const baseFp=Math.round(tier.fp||0);
+  const singleFp=Math.round(tier.singleFp||0);
   // option table rows
   const rows=items.map((c,i)=>{
     const surcharge=c.surchargesPerTier[selIdx]||0;
@@ -738,25 +800,28 @@ function renderRightSet(){
 
   p.innerHTML=`
   <div class="card">
-    <div class="slabel">옵션 세트 · ${pickCount}개 선택형</div>
+    <div class="slabel">옵션 세트 · ${pickCount}개 선택형 <span style="font-size:11px;color:var(--muted);font-weight:normal">· ${spm==='unit'?`단품가×${pickCount}${sd>0?` − ${sd}%`:''}`:`마크업 유지`}</span></div>
     <div class="irow" style="margin-bottom:2px"><span style="color:var(--muted)">기준 옵션</span><span style="font-weight:500">${baseName} ×${pickCount}</span></div>
     <div class="irow" style="margin-bottom:2px"><span style="color:var(--muted)">기준 합산 원가</span><span style="font-size:11px;color:var(--muted)">${setCostKRW.toLocaleString()}원 (${setWeightG}g)</span></div>
     <div class="irow" style="margin-bottom:2px"><span style="color:var(--muted)">기준 비용</span><span style="font-size:11px;color:var(--muted)">원가 ¥${Math.round(setCostJ).toLocaleString()} + 배송 ¥${setShipJ.toLocaleString()} + 3PL ¥${Math.round(tplJ).toLocaleString()}${extraShipKRW>0?` + 배송 ${extraShipKRW.toLocaleString()}원`:''}${extraPackKRW>0?` + 포장 ${extraPackKRW.toLocaleString()}원`:''} = ¥${Math.round(setTotalJ).toLocaleString()}</span></div>
+    ${spm==='unit'?`<div class="irow" style="margin-bottom:2px"><span style="color:var(--muted)">단품 기준가 (현재 단계)</span><span style="font-size:11px;color:var(--muted)">¥${singleFp.toLocaleString()} × ${pickCount}${sd>0?` × (1−${sd}%)`:''} = ¥${baseFp.toLocaleString()}</span></div>`:''}
     <div style="display:flex;flex-wrap:wrap;gap:3px;margin:8px 0">
       ${feeBreakdown.map(f=>`<span class="badge">${f}</span>`).join('')}
-      <span class="badge">기본 마진 ${(baseMargin*100).toFixed(1)}%</span>
+      <span class="badge">단품 마크업 ${(baseMargin*100).toFixed(1)}%</span>
     </div>
   </div>
 
   <div class="card">
-    <div class="slabel">마진 시뮬레이션 (${pickCount}개 세트 기준)</div>
+    <div class="slabel">마진 시뮬레이션 (${pickCount}개 세트 ${spm==='unit'?'· 실효 마크업':'기준'})</div>
     <table class="tier-table">
       <thead><tr><th>단계</th><th>등록가</th><th>마크업<br><span style="font-size:9px;font-weight:normal;color:var(--muted)">원가대비</span></th><th>순이익률<br><span style="font-size:9px;font-weight:normal;color:var(--muted)">매출대비</span></th><th style="text-align:right">¥마진 (≈원)</th></tr></thead>
       <tbody>${tierRows}</tbody>
     </table>
     <div class="inote" style="margin-top:8px">
       <i class="ti ti-info-circle" style="margin-right:4px;font-size:12px"></i>
-      "등록가"는 고객이 기준 옵션을 ${pickCount}개 골랐을 때의 금액. 다른 옵션을 고르면 아래 표의 추가금만큼 ±됩니다.
+      ${spm==='unit'
+        ?`"단계"는 <b>단품 1개의 마크업</b>. 세트 가격은 단품가×${pickCount}${sd>0?` − ${sd}%`:''}로 잡히고, 배송·3PL 공유 덕에 <b>실효 마크업이 더 높아져요</b>.`
+        :`"등록가"는 고객이 기준 옵션을 ${pickCount}개 골랐을 때의 금액. 다른 옵션을 고르면 아래 표의 추가금만큼 ±됩니다.`}
     </div>
   </div>
 
