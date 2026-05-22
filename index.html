@@ -291,7 +291,7 @@ body{font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
         <input id="baseMargin" type="number" value="10" min="0" max="100" step="0.5"
           style="width:50px;font-size:12px;padding:1px 4px;border:1px solid var(--border2);border-radius:4px;text-align:right"
           onclick="event.stopPropagation()"/>
-        <span style="font-size:11px">% (원가 대비 마크업 · 순이익률은 약 절반 수준)</span>
+        <span style="font-size:11px">% (매출 대비 · 다른 단계도 이 값 기준으로 자동 조정)</span>
       </div>
       <div class="fee-grid">
         <div class="fee-box on" id="fb-ad" onclick="toggleFee('ad')">
@@ -511,28 +511,27 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderOptItems();
 });
 
-function calcTier(totalCostJPY,fixedRate,markup){
-  // markup is cost-based: profit = totalCostJPY × markup
-  // price × (1 − fixedRate − couponRate) = totalCostJPY × (1 + markup)
-  const tgt=totalCostJPY*(1+markup);
-  if(1-fixedRate<=0)return null;
-  let couponRate=0,price=tgt/(1-fixedRate);
+function calcTier(totalCostJPY,fixedRate,margin){
+  // margin is revenue-based: profit = price × margin
+  // price × (1 − fixedRate − couponRate − margin) = totalCostJPY
+  if(1-fixedRate-margin<=0)return null;
+  let couponRate=0,price=totalCostJPY/(1-fixedRate-margin);
   if(fees.coupon){
     couponRate=getCouponRate(price);
-    let d=1-fixedRate-couponRate;if(d<=0)return null;
-    price=tgt/d;
+    let d=1-fixedRate-couponRate-margin;if(d<=0)return null;
+    price=totalCostJPY/d;
     couponRate=getCouponRate(price);
-    d=1-fixedRate-couponRate;if(d<=0)return null;
-    price=tgt/d;
+    d=1-fixedRate-couponRate-margin;if(d<=0)return null;
+    price=totalCostJPY/d;
     couponRate=getCouponRate(price);
   }
   const fp=Math.ceil(price/10)*10;
   const tfr=fixedRate+couponRate;
   const feeJ=fp*tfr;
   const marJ=fp-totalCostJPY-feeJ;
-  const marR=totalCostJPY>0?(marJ/totalCostJPY)*100:0; // markup (cost-based)
-  const netMarR=fp>0?(marJ/fp)*100:0;                  // net profit margin (revenue-based)
-  return{fp,feeJ,marJ,marR,netMarR,couponRate,tfr};
+  const marR=fp>0?(marJ/fp)*100:0;                       // revenue-based margin %
+  const markupR=totalCostJPY>0?(marJ/totalCostJPY)*100:0; // cost-based markup % (reference)
+  return{fp,feeJ,marJ,marR,markupR,netMarR:marR,couponRate,tfr};
 }
 
 function calc(){
@@ -628,19 +627,19 @@ function calcSet(){
     if(setPricingMode==='unit'){
       const singleBaseFp=singleResults[baseOptIdx].tierPrices[ti].fp||0;
       const targetPrice=singleBaseFp*pickCount*(1-setDiscount/100);
-      if(targetPrice<=0)return{...t,fp:0,marJ:0,marR:0,netMarR:0,couponRate:0,denom:0,singleFp:singleBaseFp};
+      if(targetPrice<=0)return{...t,fp:0,marJ:0,marR:0,markupR:0,couponRate:0,denom:0,singleFp:singleBaseFp};
       const fp=Math.ceil(targetPrice/10)*10;
       const couponRate=fees.coupon?getCouponRate(fp):0;
       const tfr=fixedRate+couponRate;
       const feeJ=fp*tfr;
       const marJ=fp-setTotalJ-feeJ;
-      const marR=setTotalJ>0?(marJ/setTotalJ)*100:0;
-      const netMarR=fp>0?(marJ/fp)*100:0;
+      const marR=fp>0?(marJ/fp)*100:0;                  // revenue-based
+      const markupR=setTotalJ>0?(marJ/setTotalJ)*100:0; // cost-based
       const denom=1-fixedRate-couponRate;
-      return{...t,fp,marJ,marR,netMarR,couponRate,tfr,denom,singleFp:singleBaseFp};
+      return{...t,fp,marJ,marR,markupR,couponRate,tfr,denom,singleFp:singleBaseFp};
     }else{
       const c=calcTier(setTotalJ,fixedRate,t.margin);
-      if(!c)return{...t,fp:0,marJ:0,marR:0,netMarR:0,couponRate:0,denom:0,singleFp:0};
+      if(!c)return{...t,fp:0,marJ:0,marR:0,markupR:0,couponRate:0,denom:0,singleFp:0};
       const denom=1-fixedRate-(c.couponRate||0)-t.margin;
       return{...t,...c,denom,singleFp:singleResults[baseOptIdx].tierPrices[ti].fp||0};
     }
@@ -696,7 +695,7 @@ function renderRight(){
       <td><span class="tbadge ${BC[t.tag]}">${t.label}</span>${s?'<span style="font-size:10px;color:var(--accent);margin-left:4px"><i class="ti ti-check"></i></span>':''}</td>
       <td><span class="pval">¥${t.fp.toLocaleString()}</span></td>
       <td><span class="mval ${mc(t.marR)}">${(t.marR??0).toFixed(1)}%</span></td>
-      <td><span class="mval ${mc(t.netMarR)}" style="font-size:12px">${(t.netMarR??0).toFixed(1)}%</span></td>
+      <td><span class="mval ${mc(t.markupR)}" style="font-size:12px">${(t.markupR??0).toFixed(1)}%</span></td>
       <td style="font-size:12px;color:var(--muted)">¥${Math.round(t.marJ??0).toLocaleString()}</td>
     </tr>`;
   }).join('');
@@ -717,11 +716,11 @@ function renderRight(){
   <div class="card">
     <div class="slabel">마진 시뮬레이션 · 행 클릭으로 선택</div>
     <table class="ptable">
-      <thead><tr><th>구분</th><th>등록가</th><th>마크업<br><span style="font-size:9px;font-weight:normal;color:var(--muted)">원가대비</span></th><th>순이익률<br><span style="font-size:9px;font-weight:normal;color:var(--muted)">매출대비</span></th><th>마진(¥)</th></tr></thead>
+      <thead><tr><th>구분</th><th>등록가</th><th>마진율<br><span style="font-size:9px;font-weight:normal;color:var(--muted)">매출대비</span></th><th>마크업<br><span style="font-size:9px;font-weight:normal;color:var(--muted)">원가대비</span></th><th>마진(¥)</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
     <div style="margin-top:10px;font-size:11px;color:var(--muted);line-height:1.6">
-      마크업 = 마진 ÷ 총원가 &nbsp;·&nbsp; 순이익률 = 마진 ÷ 판매가 &nbsp;·&nbsp; 마진 = 판매가 − 총원가 − 수수료
+      마진율 = 마진 ÷ 판매가 (매출 대비) &nbsp;·&nbsp; 마진 = 판매가 × (1−수수료) − 총원가
     </div>
   </div>
   <div class="card">
@@ -730,8 +729,8 @@ function renderRight(){
       <div style="font-size:11px;color:var(--muted);margin-bottom:4px">등록가 &nbsp;<span class="tbadge ${BC[sel.tag]}">${sel.label}</span></div>
       <div class="sel-price">¥${sel.fp?.toLocaleString()??'-'}</div>
       <div class="sel-mrow">
-        <span style="font-size:13px;color:var(--green);font-weight:500" title="원가대비 마크업">${(sel.marR??0).toFixed(1)}%<span style="font-size:9px;color:var(--muted);font-weight:normal"> 마크업</span></span>
-        <span style="font-size:13px;color:var(--green);font-weight:500" title="매출대비 순이익률">${(sel.netMarR??0).toFixed(1)}%<span style="font-size:9px;color:var(--muted);font-weight:normal"> 순이익률</span></span>
+        <span style="font-size:13px;color:var(--green);font-weight:500" title="매출대비 마진율">${(sel.marR??0).toFixed(1)}%<span style="font-size:9px;color:var(--muted);font-weight:normal"> 마진율</span></span>
+        <span style="font-size:13px;color:var(--green);font-weight:500" title="원가대비 마크업">${(sel.markupR??0).toFixed(1)}%<span style="font-size:9px;color:var(--muted);font-weight:normal"> 마크업</span></span>
         <span style="font-size:13px;color:var(--green);font-weight:500">¥${Math.round(sel.marJ??0).toLocaleString()}</span>
         <span style="font-size:12px;color:var(--muted)">≈ ${marKRW.toLocaleString()}원</span>
         ${fees.coupon&&sel.couponRate>0?`<span style="font-size:11px;color:var(--muted)">쿠폰 ${(sel.couponRate*100).toFixed(0)}% 적용</span>`:''}
@@ -781,7 +780,7 @@ function renderRightSet(){
       <td><span class="tbadge ${BC[t.tag]}">${t.label}</span>${s?'<span style="font-size:10px;color:var(--accent);margin-left:4px"><i class="ti ti-check"></i></span>':''}</td>
       <td><span class="pval">¥${Math.round(t.fp).toLocaleString()}</span></td>
       <td><span class="mval ${mc(t.marR)}">${(t.marR??0).toFixed(1)}%</span></td>
-      <td><span class="mval ${mc(t.netMarR)}" style="font-size:12px">${(t.netMarR??0).toFixed(1)}%</span></td>
+      <td><span class="mval ${mc(t.markupR)}" style="font-size:12px">${(t.markupR??0).toFixed(1)}%</span></td>
       <td style="font-size:12px;color:var(--muted);text-align:right">¥${Math.round(t.marJ||0).toLocaleString()}<br><span style="font-size:10px">≈${marKRW.toLocaleString()}원</span></td>
     </tr>`;
   }).join('');
@@ -814,7 +813,7 @@ function renderRightSet(){
   <div class="card">
     <div class="slabel">마진 시뮬레이션 (${pickCount}개 세트 ${spm==='unit'?'· 실효 마크업':'기준'})</div>
     <table class="tier-table">
-      <thead><tr><th>단계</th><th>등록가</th><th>마크업<br><span style="font-size:9px;font-weight:normal;color:var(--muted)">원가대비</span></th><th>순이익률<br><span style="font-size:9px;font-weight:normal;color:var(--muted)">매출대비</span></th><th style="text-align:right">¥마진 (≈원)</th></tr></thead>
+      <thead><tr><th>단계</th><th>등록가</th><th>마진율<br><span style="font-size:9px;font-weight:normal;color:var(--muted)">매출대비</span></th><th>마크업<br><span style="font-size:9px;font-weight:normal;color:var(--muted)">원가대비</span></th><th style="text-align:right">¥마진 (≈원)</th></tr></thead>
       <tbody>${tierRows}</tbody>
     </table>
     <div class="inote" style="margin-top:8px">
