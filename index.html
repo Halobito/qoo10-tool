@@ -279,7 +279,7 @@ body{font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
         <input id="baseMargin" type="number" value="10" min="0" max="100" step="0.5"
           style="width:50px;font-size:12px;padding:1px 4px;border:1px solid var(--border2);border-radius:4px;text-align:right"
           onclick="event.stopPropagation()"/>
-        <span style="font-size:11px">% (다른 단계도 이 값 기준으로 자동 조정)</span>
+        <span style="font-size:11px">% (원가 대비 · 다른 단계도 이 값 기준으로 자동 조정)</span>
       </div>
       <div class="fee-grid">
         <div class="fee-box on" id="fb-ad" onclick="toggleFee('ad')">
@@ -486,23 +486,26 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderOptItems();
 });
 
-function calcTier(totalCostJPY,fixedRate,margin){
-  if(1-fixedRate-margin<=0)return null;
-  let couponRate=0,price=totalCostJPY/(1-fixedRate-margin);
+function calcTier(totalCostJPY,fixedRate,markup){
+  // markup is cost-based: profit = totalCostJPY × markup
+  // price × (1 − fixedRate − couponRate) = totalCostJPY × (1 + markup)
+  const tgt=totalCostJPY*(1+markup);
+  if(1-fixedRate<=0)return null;
+  let couponRate=0,price=tgt/(1-fixedRate);
   if(fees.coupon){
     couponRate=getCouponRate(price);
-    let d=1-fixedRate-couponRate-margin;if(d<=0)return null;
-    price=totalCostJPY/d;
+    let d=1-fixedRate-couponRate;if(d<=0)return null;
+    price=tgt/d;
     couponRate=getCouponRate(price);
-    d=1-fixedRate-couponRate-margin;if(d<=0)return null;
-    price=totalCostJPY/d;
+    d=1-fixedRate-couponRate;if(d<=0)return null;
+    price=tgt/d;
     couponRate=getCouponRate(price);
   }
   const fp=Math.ceil(price/10)*10;
   const tfr=fixedRate+couponRate;
   const feeJ=fp*tfr;
   const marJ=fp-totalCostJPY-feeJ;
-  const marR=(marJ/fp)*100;
+  const marR=totalCostJPY>0?(marJ/totalCostJPY)*100:0; // cost-based markup %
   return{fp,feeJ,marJ,marR,couponRate,tfr};
 }
 
@@ -655,7 +658,7 @@ function renderRight(){
       <tbody>${rows}</tbody>
     </table>
     <div style="margin-top:10px;font-size:11px;color:var(--muted);line-height:1.6">
-      마진율 = 마진 ÷ 판매가 &nbsp;·&nbsp; 마진 = 판매가 × (1−수수료) − 총원가
+      마진율 = 마진 ÷ 총원가 (원가 대비) &nbsp;·&nbsp; 마진 = 판매가 × (1−수수료) − 총원가
     </div>
   </div>
   <div class="card">
