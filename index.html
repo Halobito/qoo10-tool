@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -957,7 +958,7 @@ async function generate(){
         'anthropic-version':'2023-06-01',
         'anthropic-dangerous-direct-browser-access':'true'
       },
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:5000,system:SYS,messages:[{role:'user',content:msg}]})
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:5000,system:SYS,messages:[{role:'user',content:msg}]})
     });
     if(!res.ok){
       const errText=await res.text();
